@@ -4,12 +4,10 @@ $user = "root";
 $pass = "";
 $db   = "umkm1";
 
-$koneksi = mysqli_connect($host, $user, $pass, $db);
-
-// Cek koneksi
-if (!$koneksi) {
-    die("Koneksi gagal: " . mysqli_connect_error());
-} else {
-    //echo "Koneksi berhasil ke database '$db'";
+try {
+    $koneksi = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
+    $koneksi->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Koneksi gagal: " . $e->getMessage());
 }
 ?>

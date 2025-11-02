@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once 'config/koneksi.php';
 require_once 'app/models/MenuModel.php';
 require_once 'app/models/KaryawanModel.php';
@@ -8,12 +11,13 @@ $karyawanModel = new KaryawanModel($koneksi);
 
 $page = $_GET['page'] ?? 'home';
 
-if ($page === 'menu') {
-    $menuData = $menuModel->getAllMenu();
-} elseif ($page === 'karyawan') {
-    $karyawanData = $karyawanModel->getAllKaryawan();
+if ($page === 'menu_admin') {
+    //echo "<p>SEDANG MEMUAT: " . __DIR__ . '/app/views/menu_admin.php' . "</p>";
+    include __DIR__ . '/app/views/menu_admin.php';
+    exit;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -25,8 +29,8 @@ if ($page === 'menu') {
   <meta name="keywords" content="">
   
   <!-- Favicons -->
-  <link href="assets/img/favicon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="assets/img/logo-seblak-sementara.png" rel="icon">
+  <link href="assets/img/logo-seblak-sementara.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -72,14 +76,14 @@ if ($page === 'menu') {
         <a href="index.html" class="logo d-flex align-items-center">
           <!-- Uncomment the line below if you also wish to use an image logo -->
           <!-- <img src="assets/img/logo.png" alt=""> -->
-          <h1 class="sitename">Delicious</h1>
+          <h1 class="sitename">Seblak Sayy Ah</h1>
         </a>
 
         <nav id="navmenu" class="navmenu">
           <ul>
             <li><a href="index.php?page=home" class="<?= ($page === 'home') ? 'active' : '' ?>">Home</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="#menu">Menu</a></li>
+            <li><a href="index.php?page=menu_admin" class="<?= ($page === 'menu_admin') ? 'active' : '' ?>">Menu</a></li>
             <li><a href="#specials">Specials</a></li>
             <li><a href="#events">Events</a></li>
             <li><a href="#chefs">Chefs</a></li>
@@ -121,7 +125,9 @@ $karyawanData = $karyawanModel->getAllKaryawan();
           <img src="assets/img/hero-carousel/bg2.png" alt="">
           <div class="carousel-container">
             <h2><span>Seblak Say Cafe</span> Restaurant</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p>“Lapar? Nggak usah galau! Yuk, mampir ke Seblak Say Café 
+                Seblaknya pedesnya nampol, rasanya nagih, dan topping-nya melimpah!
+                Nongkrong makin seru, perut kenyang, hati senang </p>
             <div>
               <a href="#menu" class="btn-get-started">Our Menu</a>
               <a href="#book-a-table" class="btn-get-started">Book a table</a>
@@ -130,7 +136,7 @@ $karyawanData = $karyawanModel->getAllKaryawan();
         </div><!-- End Carousel Item -->
 
         <div class="carousel-item">
-          <img src="assets/img/hero-carousel/hero-carousel-2.jpg" alt="">
+          <img src="assets/img/hero-carousel/bg1.jpg" alt="">
           <div class="carousel-container">
             <h2>At vero eos et accusamus</h2>
             <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut.</p>
@@ -142,7 +148,7 @@ $karyawanData = $karyawanModel->getAllKaryawan();
         </div><!-- End Carousel Item -->
 
         <div class="carousel-item">
-          <img src="assets/img/hero-carousel/hero-carousel-3.jpg" alt="">
+          <img src="assets/img/hero-carousel/bg3.jpg" alt="">
           <div class="carousel-container">
             <h2>Temporibus autem quibusdam</h2>
             <p>Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt omnis iste natus error sit voluptatem accusantium.</p>
