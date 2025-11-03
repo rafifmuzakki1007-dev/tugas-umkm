@@ -9,7 +9,10 @@
       <?php if (!empty($menuData)): ?>
         <?php foreach ($menuData as $menu): ?>
           <div class="col-lg-4 menu-item">
-            <img src="assets/img/menu/<?= htmlspecialchars($menu['gambar']); ?>" class="menu-img img-fluid" alt="">
+            <img src="assets/img/menu/<?= $menu['gambar']; ?>" 
+              class="menu-img img-fluid" 
+              alt="<?= $menu['nama_menu']; ?>">
+
             <h4><?= htmlspecialchars($menu['nama_menu']); ?></h4>
             <p class="price">Rp <?= number_format($menu['harga'], 0, ',', '.'); ?></p>
             <p class="ingredients">Stok: <?= htmlspecialchars($menu['stok']); ?> pcs</p>
