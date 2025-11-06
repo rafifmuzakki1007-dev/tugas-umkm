@@ -1,60 +1,93 @@
 <?php
+ob_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-session_start();
 
 require_once 'config/koneksi.php';
 require_once 'app/models/MenuModel.php';
+require_once 'app/models/KaryawanModel.php';
 
 $menuModel = new MenuModel($koneksi);
+$karyawanModel = new KaryawanModel($koneksi);
 
-// Ambil page dari URL, default 'home'
-$page = $_GET['page'] ?? 'home';
+// pastikan selalu array (anti Warning chefs)
+$karyawans = $karyawanModel->getAllKaryawan() ?? [];
 
-// Daftar halaman admin yang butuh login
-$adminPages = ['dashboard', 'menu_admin'];
+$page = isset($_GET['page']) ? strtolower($_GET['page']) : 'home';
 
-// Jika halaman termasuk admin, cek login
-if (in_array($page, $adminPages)) {
-    if (!isset($_SESSION['user'])) {
-        header("Location: login.php"); 
+/* ---------------- ADMIN PAGE LIST ---------------- */
+$admin_pages = ['dashboard', 'menu_admin', 'transaksi_admin', 'profile_admin'];
+
+/* ---------------- LOGOUT ---------------- */
+if ($page === 'logout') {
+    session_unset();
+    session_destroy();
+    header("Location: index.php?page=home");
+    exit;
+}
+
+/* ---------------- ADMIN ROUTING ---------------- */
+if (in_array($page, $admin_pages)){
+
+    if (!isset($_SESSION['admin_logged_in'])) {
+        header("Location: login.php");
         exit;
     }
-}
 
-/*************** ADMIN ROUTES ***************/
-if ($page === 'dashboard') {
-    $admin_content = 'app/views/admin/dashboard.php';
-    include 'app/views/admin/layout_admin.php';
+    // Lewat layout admin agar design tetap konsisten
+    include "app/views/admin/layout_admin.php";
     exit;
 }
 
-if ($page === 'menu_admin') {
-    $admin_content = 'app/views/admin/menu_admin.php';
-    include 'app/views/admin/layout_admin.php';
+/* ---------------- USER ROUTES ---------------- */
+
+//Halaman sukses setelah pesan
+if ($page === 'order_success') {
+    include "app/views/order_success.php";
     exit;
 }
 
-// LOGOUT admin
-if ($page === 'logout') {
-    session_destroy();
-    header("Location: login.php");
-    exit;
-}
-
-/*************** USER ROUTES ***************/
+//Halaman menu
 if ($page === 'menu') {
     $menus = $menuModel->getAllMenu();
-    include 'app/views/menu.php';
+    include "app/views/menu.php";
     exit;
 }
 
-/*************** FORM SUBMIT ORDER ***************/
+//Proses pesanan
 if ($page === 'pesan_process') {
-    include 'app/controllers/pesan_process.php';
+    include "app/controllers/pesan_process.php";
     exit;
 }
 
-/*************** DEFAULT HOME (FRONTEND) ***************/
+//Cart
+if ($page === 'cart') {
+    include "app/views/cart.php";
+    exit;
+}
+
+//Riwayat Pesanan User
+if ($page === 'riwayat') {
+    include "app/views/riwayat.php";
+    exit;
+}
+
+//Login
+if ($page === 'login') {
+    if (file_exists("login.php")) {
+        include "login.php";
+    } else {
+        echo "<h3>Halaman login tidak ditemukan.</h3>";
+    }
+    exit;
+}
+
+/* 
+---------------- DEFAULT → HOME ----------------
+Jika user klik "Chefs" di navbar → sebenarnya hanya scroll (#chefs)
+Jadi tetap load home.php
+*/
 $menus = $menuModel->getAllMenu();
-include 'app/views/home.php';
+include "app/views/home.php";

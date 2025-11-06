@@ -8,8 +8,8 @@
   <meta name="keywords" content="">
   
   <!-- Favicons -->
-  <link href="assets/img/favicon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="assets/img/logo-seblak-sementara.png" rel="icon">
+  <link href="assets/img/logo-seblak-sementara.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -25,6 +25,7 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: Delicious
@@ -55,7 +56,7 @@
         <a href="index.php?page=home" class="logo d-flex align-items-center">
           <!-- Uncomment the line below if you also wish to use an image logo -->
           <!-- <img src="assets/img/logo.png" alt=""> -->
-          <h1 class="sitename">Delicious</h1>
+          <h1 class="sitename">Sayy Cafe</h1>
         </a>
 
         <nav id="navmenu" class="navmenu">
@@ -66,7 +67,6 @@
             <li><a href="#chefs">Chefs</a></li>
             <li><a href="#gallery">Gallery</a></li>
             <li><a href="#contact">Contact</a></li>
-            <li><a href="index.php?page=dashboard" style="font-weight:600;color:#ffca28">Admin Panel</a></li>
           </ul>
           <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
         </nav>
@@ -85,9 +85,9 @@
       <div id="hero-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
 
         <div class="carousel-item active">
-          <img src="assets/img/hero-carousel/bg2.png" alt="">
+          <img src="assets/img/hero-carousel/bg2.jpeg" alt="">
           <div class="carousel-container">
-            <h2><span>Delicious</span> Restaurant</h2>
+            <h2><span>Seblak</span> Restaurant</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
             <div>
               <a href="#menu" class="btn-get-started">Our Menu</a>
@@ -97,7 +97,7 @@
         </div><!-- End Carousel Item -->
 
         <div class="carousel-item">
-          <img src="assets/img/hero-carousel/hero-carousel-2.jpg" alt="">
+          <img src="assets/img/hero-carousel/bg1.jpg" alt="">
           <div class="carousel-container">
             <h2>At vero eos et accusamus</h2>
             <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut.</p>
@@ -109,7 +109,7 @@
         </div><!-- End Carousel Item -->
 
         <div class="carousel-item">
-          <img src="assets/img/hero-carousel/hero-carousel-3.jpg" alt="">
+          <img src="assets/img/hero-carousel/bg3.jpg" alt="">
           <div class="carousel-container">
             <h2>Temporibus autem quibusdam</h2>
             <p>Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt omnis iste natus error sit voluptatem accusantium.</p>
@@ -359,36 +359,69 @@
     </section><!-- /Gallery Section -->
 
     <!-- Chefs Section -->
-     <section id="chefs" class="chefs section">
+<?php 
+// Fallback jika DB kosong
+$karyawans = $karyawans ?? [];
 
-  <div class="container section-title" data-aos="fade-up">
-    <h2>Chefs</h2>
-    <div><span>Our Professional</span> <span class="description-title">Chefs</span></div>
-  </div>
+if (count($karyawans) == 0) {
+  $karyawans = [
+    ["foto" => "chefs-1.jpg", "nama" => "Walter White", "jabatan" => "Master Chef"],
+    ["foto" => "chefs-2.jpg", "nama" => "Sarah Jhonson", "jabatan" => "Patissier"],
+    ["foto" => "chefs-3.jpg", "nama" => "William Anderson", "jabatan" => "Cook"],
+  ];
+}
+?>
 
+<section id="chefs" class="chefs section-bg">
   <div class="container">
-    <div class="row gy-5">
 
-      <?php foreach ($karyawans as $k): ?>
-      <div class="col-lg-4 col-md-6" data-aos="fade-up">
-        <div class="member text-center">
-          <div class="pic">
-            <img src="assets/img/chefs/default-chef.jpg" class="img-fluid" alt="">
+    <!-- Title sesuai template -->
+    <div class="section-header text-center mb-5" data-aos="fade-up">
+      <span class="subtitle-chef">CHEFS</span>
+      <h2 class="chef-title">Our <span>Professional</span> Chefs</h2>
+    </div>
+
+    <div class="row gy-4">
+
+      <?php 
+      $i = 1;
+      foreach ($karyawans as $chef): 
+        $foto = $chef['foto'] ?? "chefs-$i.jpg"; 
+        $nama = $chef['nama'] ?? ($chef['nama_karyawan'] ?? 'Nama Tidak Ada');
+        $jabatan = $chef['jabatan'] ?? ($chef['posisi'] ?? 'Chef');
+      ?>
+
+      <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="<?= $i*100 ?>">
+        <div class="chef-member">
+
+          <div class="member-img">
+            <img src="assets/img/chefs/<?= $foto ?>" class="img-fluid" style="height:350px; width:100%; object-fit:cover;" alt="">
+            <div class="social">
+              <a href="#"><i class="bi bi-twitter"></i></a>
+              <a href="#"><i class="bi bi-facebook"></i></a>
+              <a href="#"><i class="bi bi-instagram"></i></a>
+              <a href="#"><i class="bi bi-linkedin"></i></a>
+            </div>
           </div>
+
           <div class="member-info">
-            <h4><?= $k['nama']; ?></h4>
-            <span><?= $k['jabatan']; ?></span>
+            <h4><?= $nama ?></h4>
+            <span><?= ucfirst($jabatan) ?></span>
           </div>
+
         </div>
       </div>
-      <?php endforeach; ?>
+
+      <?php 
+      $i++;
+      endforeach; 
+      ?>
 
     </div>
+
   </div>
-
 </section>
-
-    <!-- /Chefs Section -->
+<!-- /Chefs Section -->
 
     <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials section dark-background">
@@ -589,66 +622,24 @@
   </main>
 
   <footer id="footer" class="footer dark-background">
-
-    <div class="container">
-      <div class="row gy-3">
-        <div class="col-lg-3 col-md-6 d-flex">
-          <i class="bi bi-geo-alt icon"></i>
-          <div class="address">
-            <h4>Address</h4>
-            <p>A108 Adam Street</p>
-            <p>New York, NY 535022</p>
-            <p></p>
-          </div>
-
-        </div>
-
-        <div class="col-lg-3 col-md-6 d-flex">
-          <i class="bi bi-telephone icon"></i>
-          <div>
-            <h4>Contact</h4>
-            <p>
-              <strong>Phone:</strong> <span>+1 5589 55488 55</span><br>
-              <strong>Email:</strong> <span>info@example.com</span><br>
-            </p>
-          </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 d-flex">
-          <i class="bi bi-clock icon"></i>
-          <div>
-            <h4>Opening Hours</h4>
-            <p>
-              <strong>Mon-Sat:</strong> <span>11AM - 23PM</span><br>
-              <strong>Sunday</strong>: <span>Closed</span>
-            </p>
-          </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-          <h4>Follow Us</h4>
-          <div class="social-links d-flex">
-            <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
-            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-            <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
+    ...
     <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="px-1 sitename">Delicious</strong> <span>All Rights Reserved</span></p>
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Seblak Say Cafe</strong> <span>All Rights Reserved</span></p>
       <div class="credits">
         <!-- All the links in the footer should remain intact. -->
         <!-- You can delete the links only if you've purchased the pro version. -->
         <!-- Licensing information: https://bootstrapmade.com/license/ -->
         <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+
+      Designed by 
+      <a href="#" onclick="window.location='index.php?page=dashboard'" style="opacity:0.2; color:#ffca28; text-decoration:none;"
+        onmouseover="this.style.opacity=1" 
+        onmouseout="this.style.opacity=0.2">
+      Nothing
+      </a>
       </div>
     </div>
-
+...
   </footer>
 
   <!-- Scroll Top -->
@@ -669,6 +660,94 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
-</body>
+<!-- Floating Admin Button -->
+<a href="index.php?page=dashboard" class="admin-float-btn">
+  <i class="bi bi-shield-lock"></i>
+</a>
 
+<style>
+.admin-float-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #ffca28;
+  color: #000;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 22px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+  transition: .3s ease;
+  z-index: 9999;
+  opacity: 0.25; /* jadi rahasia */
+}
+.admin-float-btn:hover {
+  background: #ffb300;
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.chef-member {
+  text-align: center;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(0,0,0,0.08);
+  padding-bottom: 20px;
+  transition: .3s;
+}
+.chef-member:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.section-header h2 {
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.section-header p {
+  margin-bottom: 0;
+  font-size: 18px;
+  color: #6c757d;
+}
+
+.section-header span {
+  color: #ffb03b;
+}
+
+.section-header .subtitle-chef {
+  display: inline-block;
+  background: #fff6e6;
+  padding: 8px 22px;
+  font-size: 14px;
+  border-radius: 30px;
+  color: #e8a73e;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.section-header .chef-title {
+  font-family: "Playfair Display", serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: #3b3b3b;
+  margin-bottom: 10px;
+}
+
+.section-header .chef-title span {
+  color: #e8a73e;
+}
+</style>
+
+</body>
 </html>

@@ -1,24 +1,33 @@
 <?php
 session_start();
-require_once 'config/koneksi.php';
 
-if (isset($_SESSION['user'])) {
+// Kalau sudah login admin → langsung dashboard
+if (isset($_SESSION['admin_logged_in'])) {
     header("Location: index.php?page=dashboard");
     exit;
 }
 
+require_once 'config/koneksi.php';
+
 $msg = "";
 
+// Login proses
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = md5($_POST['password']);
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']); // pakai plain text sesuai permintaan
 
-    $q = $koneksi->prepare("SELECT * FROM users WHERE username=? AND password=?");
-    $q->execute([$username,$password]);
+    $q = $koneksi->prepare("SELECT * FROM users WHERE username = ?");
+    $q->execute([$username]);
     $user = $q->fetch(PDO::FETCH_ASSOC);
 
-    if ($user) {
+    if ($user && $user['password'] === $password) {
+
+        // Session admin
+        $_SESSION['admin_logged_in'] = true;
         $_SESSION['user'] = $user;
+        $_SESSION['admin'] = true;
+        $_SESSION['role'] = $user['role'] ?? 'admin';
+
         header("Location: index.php?page=dashboard");
         exit;
     } else {
@@ -38,132 +47,74 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
+header, .topbar, .bg-dark, #header, nav, .navmenu { display: none !important; }
 
-/* ===== BACKGROUND ===== */
 body{
     background: url('assets/img/bg-login.jpg') center/cover no-repeat;
     height:100vh;
-    margin:0;
-    padding:0;
+    width:100vw;
     display:flex;
     justify-content:center;
     align-items:center;
     font-family: "Poppins", sans-serif;
+    margin:0;
+    padding:0;
     overflow:hidden;
     position:relative;
 }
-
 body::before{
     content:"";
     position:absolute;
     inset:0;
-    background: rgba(0,0,0,0.50);
+    background: rgba(0,0,0,0.45);
     backdrop-filter: blur(5px);
-    z-index:1;
 }
 
-/* ===== CARD ===== */
 .login-box{
-    position:relative;
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%, -50%);
     width:360px;
-    background: rgba(255,255,255,0.20);
-    border:1px solid rgba(255,255,255,0.45);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.22);
+    border:1px solid rgba(255,255,255,0.4);
+    backdrop-filter: blur(14px);
     border-radius:18px;
-    padding:32px 28px;
+    padding:32px;
     box-shadow: 0 20px 45px rgba(0,0,0,.50);
-    animation: zoom .5s ease-out;
-    z-index:5;
+    z-index:10;
+    opacity: 0;
+    animation: fadeInZoom .6s ease forwards;
+}
+@keyframes fadeInZoom {
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
-@keyframes zoom{
-    from{transform: scale(.85); opacity:0;}
-    to{transform: scale(1); opacity:1;}
-}
-
-.login-title{
-    font-weight:700;
-    font-size:22px;
-    text-align:center;
-    margin-bottom:18px;
-    color:#fff;
-}
-
-/* ===== INPUTS ===== */
-.input-group-text{
-    background:rgba(255,255,255,.8);
-    border:none;
-    border-radius:12px 0 0 12px;
-}
-
-.form-control{
-    border:none;
-    border-radius:0 12px 12px 0;
-    background:rgba(255,255,255,.8);
-}
-
-.form-control:focus{
-    background:white;
-}
-
-/* ===== BUTTON ===== */
 .btn-login{
     background: linear-gradient(90deg,#ff4b2b,#ff416c);
     border:none;
-    border-radius:12px;
     padding:10px;
     font-weight:600;
     width:100%;
+    border-radius:10px;
     color:white;
     transition:.25s;
 }
+.btn-login:hover{ box-shadow:0 10px 25px rgba(255,65,108,.45); }
 
-.btn-login:hover{
-    transform:translateY(-2px);
-    box-shadow:0 10px 25px rgba(255,65,108,.45);
-}
-
-/* ===== EXTRA ===== */
-.reg{
-    text-align:center;
-    margin-top:14px;
-    font-size:14px;
-    color:#fff;
-}
-
-.reg a{
-    text-decoration:none;
-    font-weight:600;
-    color:#ffbaba;
-}
-.reg a:hover{ text-decoration:underline; }
-
-.alert-custom{
-    background:rgba(255,147,147,.75);
-    border:1px solid #e02a2a;
-    border-radius:10px;
-    color:#fff;
-    font-size:14px;
-    padding:8px;
-    text-align:center;
-    margin-bottom:10px;
-}
-
+.btn-loading{ pointer-events:none; opacity:.7; }
 </style>
 </head>
 
 <body>
 
 <div class="login-box">
-
-    <div class="login-title">Login Admin</div>
+    <div class="text-center text-white fw-bold fs-5 mb-3">Login Admin</div>
 
     <?php if($msg): ?>
-        <div class="alert-custom"><?= $msg ?></div>
+        <div class="alert alert-danger py-2 text-center"><?= $msg ?></div>
     <?php endif; ?>
 
-    <form method="POST">
+    <form method="POST" id="loginForm">
 
         <div class="mb-3 input-group">
             <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -175,13 +126,22 @@ body::before{
             <input type="password" name="password" class="form-control" placeholder="Password" required>
         </div>
 
-        <button class="btn-login">Login</button>
+        <button class="btn-login" id="loginBtn">Login</button>
     </form>
 
-    <div class="reg">
-        Belum punya akun? <a href="register.php">Register</a>
+    <div class="text-center text-white mt-2">
+        Belum punya akun? <a href="register.php" class="text-warning">Register</a>
     </div>
 </div>
+
+<script>
+// Button Loading Animation
+document.getElementById("loginForm").addEventListener("submit", function() {
+    let btn = document.getElementById("loginBtn");
+    btn.classList.add("btn-loading");
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Loading...`;
+});
+</script>
 
 </body>
 </html>

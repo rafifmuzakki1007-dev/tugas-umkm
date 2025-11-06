@@ -13,7 +13,7 @@ $success = "";
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama = $_POST['nama'];
     $username = $_POST['username'];
-    $password = md5($_POST['password']);
+    $password = $_POST['password']; // simpan password asli
 
     $check = $koneksi->prepare("SELECT * FROM users WHERE username=?");
     $check->execute([$username]);
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
 <meta charset="UTF-8">
 <title>Register Admin | UMKM Seblak</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -43,79 +43,62 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 body{
     background: url('assets/img/bg-login.jpg') center/cover no-repeat;
     height:100vh; display:flex; justify-content:center; align-items:center;
-    font-family: "Poppins", sans-serif; position:relative; margin:0; padding:0;
+    font-family: "Poppins", sans-serif; position:relative;
+    margin:0; padding:0; overflow:hidden;
 }
 body::before{
-    content:""; position:absolute; inset:0;
-    background:rgba(0,0,0,0.50); backdrop-filter:blur(6px);
+    content:""; position:absolute; inset:0; z-index:1;
+    background:rgba(0,0,0,0.55); backdrop-filter:blur(5px);
 }
+
 .register-box{
-    position:relative; width:360px;
-    background: rgba(255,255,255,0.22);
-    border:1px solid rgba(255,255,255,0.35);
-    backdrop-filter: blur(15px);
-    border-radius:18px; padding:32px 28px;
+    position:relative; z-index:2;
+    width:360px; padding:32px 28px;
+    border-radius:18px; 
+    backdrop-filter:blur(15px);
+    background:rgba(255,255,255,0.20);
+    border:1px solid rgba(255,255,255,0.25);
     box-shadow:0 18px 38px rgba(0,0,0,.45);
-    animation: zoom .5s ease-out;
-    z-index:5;
+    animation:show .4s ease-out;
 }
-@keyframes zoom{
-    from{transform:scale(.85); opacity:0;}
-    to{transform:scale(1); opacity:1;}
+
+@keyframes show{
+    from{transform:translateY(25px); opacity:0;}
+    to{transform:translateY(0); opacity:1;}
 }
+
 .register-title{
-    font-weight:700; font-size:22px;
-    text-align:center; margin-bottom:18px; color:#fff;
+    font-size:22px; font-weight:700; color:#fff;
+    text-align:center; margin-bottom:18px;
 }
-.input-group-text{
-    background:rgba(255,255,255,.85);
-    border:none; border-radius:12px 0 0 12px;
+
+.input-group-text, .form-control{
+    background:rgba(255,255,255,.88);
+    border:none; 
 }
-.form-control{
-    border:none; border-radius:0 12px 12px 0;
-    background:rgba(255,255,255,.85);
-}
-.form-control:focus{
-    background:white;
-}
+
+.form-control:focus{background:white;}
 .btn-register{
+    width:100%; border:none; padding:11px;
     background:linear-gradient(90deg,#ff4b2b,#ff416c);
-    border:none; border-radius:12px;
-    padding:10px; font-weight:600;
-    width:100%; color:white;
-    transition:.25s;
+    border-radius:12px; font-weight:600; color:white;
 }
-.btn-register:hover{
-    transform:translateY(-2px);
-    box-shadow:0 10px 25px rgba(255,65,108,.45);
-}
-.reg{
-    text-align:center; margin-top:14px;
-    font-size:14px; color:#fff;
-}
-.reg a{
-    text-decoration:none; font-weight:600; color:#ffbaba;
-}
+
+.reg{ text-align:center; margin-top:12px; color:white; font-size:14px;}
+.reg a{ color:#ffd2d2; font-weight:600; text-decoration:none; }
 .reg a:hover{ text-decoration:underline; }
 
-/* Eye Icon */
-.password-wrapper{
-    position:relative;
-}
+.password-wrapper{ position:relative; }
 .password-eye{
-    position:absolute;
-    right:14px;
-    top:50%;
-    transform:translateY(-50%);
-    cursor:pointer;
-    font-size:18px;
-    opacity:.8;
-    transition:.2s;
+    position:absolute; right:13px; top:50%;
+    transform:translateY(-50%); cursor:pointer;
+    font-size:18px; opacity:.8;
 }
-.password-eye:hover{
-    opacity:1;
-    transform:translateY(-50%) scale(1.1);
-}
+.password-eye:hover{opacity:1}
+
+/* ✅ Prevent screen flicker */
+.swal2-container { backdrop-filter:none !important; }
+.swal2-popup{ z-index:9999; }
 </style>
 </head>
 
@@ -125,7 +108,6 @@ body::before{
     <div class="register-title">Buat Akun Admin</div>
 
     <form method="POST">
-
         <div class="mb-2 input-group">
             <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
             <input type="text" name="nama" class="form-control" placeholder="Nama Lengkap" required>
@@ -136,31 +118,46 @@ body::before{
             <input type="text" name="username" class="form-control" placeholder="Username" required>
         </div>
 
-        <!-- Password field -->
         <div class="mb-3 password-wrapper">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
                 <input type="password" id="passwordInput" name="password" class="form-control" placeholder="Password" required>
             </div>
-            <i class="bi bi-eye-slash password-eye" id="eyeIcon" onclick="togglePassword()"></i>
+            <i id="eyeIcon" class="bi bi-eye-slash password-eye" onclick="togglePassword()"></i>
         </div>
 
         <button class="btn-register">Register</button>
     </form>
 
-    <div class="reg">
-        Sudah punya akun? <a href="login.php">Login</a>
-    </div>
+    <div class="reg">Sudah punya akun? <a href="login.php">Login</a></div>
 </div>
 
 <?php if ($msg): ?>
-<script>Swal.fire("Gagal", "<?= $msg ?>", "error");</script>
+<script>
+Swal.fire({
+    icon:"error",
+    title:"Gagal",
+    text:"<?= $msg ?>",
+    confirmButtonColor:"#ff416c"
+});
+</script>
 <?php endif; ?>
 
 <?php if ($success): ?>
 <script>
-Swal.fire({title:"Berhasil!", text:"Akun berhasil dibuat, silakan login.", icon:"success"})
-.then(()=> window.location="login.php");
+document.addEventListener("DOMContentLoaded", ()=>{
+    setTimeout(()=>{
+        Swal.fire({
+            icon:"success",
+            title:"Berhasil!",
+            text:"Akun berhasil dibuat, silakan login.",
+            confirmButtonText:"OK",
+            allowOutsideClick:false,
+            allowEscapeKey:false,
+            heightAuto:false
+        }).then(()=> window.location="login.php");
+    }, 200);
+});
 </script>
 <?php endif; ?>
 
@@ -168,13 +165,9 @@ Swal.fire({title:"Berhasil!", text:"Akun berhasil dibuat, silakan login.", icon:
 function togglePassword(){
     const pw=document.getElementById("passwordInput");
     const icon=document.getElementById("eyeIcon");
-    if(pw.type==="password"){
-        pw.type="text";
-        icon.classList.replace("bi-eye-slash","bi-eye");
-    } else {
-        pw.type="password";
-        icon.classList.replace("bi-eye","bi-eye-slash");
-    }
+    pw.type = (pw.type === "password") ? "text" : "password";
+    icon.classList.toggle("bi-eye");
+    icon.classList.toggle("bi-eye-slash");
 }
 </script>
 

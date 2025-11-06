@@ -10,7 +10,7 @@ class KaryawanModel {
         $query = "SELECT * FROM karyawan";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC); // ✅ ini yang benar untuk PDO
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); 
     }
 }
 ?>
