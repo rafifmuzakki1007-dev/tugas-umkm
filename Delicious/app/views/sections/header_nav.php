@@ -20,20 +20,22 @@ $cartCount = array_sum($_SESSION['cart']);
 
 <header id="header" class="header fixed-top">
 
-  <div class="topbar d-flex align-items-center bg-light py-1 border-bottom">
+  <!--<div class="topbar d-flex align-items-center bg-light py-1 border-bottom">
     <div class="container d-flex justify-content-between">
       <div class="contact-info small">
         <i class="bi bi-phone"></i> +62 8129-0966-363  
         <span class="ms-3"><i class="bi bi-clock"></i> Everyday: 10:00-22:00</span>
       </div>
-      <a href="#" class="btn btn-warning rounded-pill px-4 py-1 fw-semibold shadow-sm">Book a table</a>
+      <a href="#" class="btn btn-warning rounded-pill px-4 py-1 fw-semibold shadow-sm">Book a table</a>-->
     </div>
   </div>
 
   <div class="bg-dark text-white shadow-sm">
     <div class="container d-flex align-items-center justify-content-between py-2">
 
-      <a href="index.php" class="text-white text-decoration-none fw-bold fs-4">Seblak Sayy Cafe</a>
+    <p class="text-white text-decoration-none fw-bold fs-4"> Seblak Say Cafe</p>
+
+      <!-- <a href="index.php" class="text-white text-decoration-none fw-bold fs-4">Seblak Sayy Cafe</a> -->
 
       <?php if(isset($_SESSION['admin'])): ?>
       <form method="GET" action="index.php" class="d-none d-md-flex align-items-center" style="width:300px;">

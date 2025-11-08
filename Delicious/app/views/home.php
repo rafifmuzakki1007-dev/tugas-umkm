@@ -43,27 +43,29 @@
     <div class="topbar d-flex align-items-center">
       <div class="container d-flex justify-content-end justify-content-md-between">
         <div class="contact-info d-flex align-items-center">
-          <i class="bi bi-phone d-flex align-items-center d-none d-lg-block"><span>+62 8129-0966-363</span></i>
+          <!-- <i class="bi bi-phone d-flex align-items-center d-none d-lg-block"><span>+62 8129-0966-363</span></i> -->
           <i class="bi bi-clock ms-4 d-none d-lg-flex align-items-center"><span>everyday: 10:00 AM - 22.00 PM</span></i>
+          <a href=""><i class="bi bi-whatsapp ms-4 d-none d-lg-flex align-items-center"><span>+62 8129-0966-363</span></i></a>
+          <a href="https://www.tiktok.com/@seblakprasmanansaycafe?is_from_webapp=1&sender_device=pc"><i class="bi bi-tiktok ms-4 d-none d-lg-flex align-items-center"></i></a>
         </div>
-        <a href="#book-a-table" class="cta-btn">Booka a table</a>
+        <!-- <a href="#book-a-table" class="cta-btn">Booka a table</a> -->
       </div>
     </div><!-- End Top Bar -->
 
     <div class="branding d-flex align-items-cente">
 
       <div class="container position-relative d-flex align-items-center justify-content-between">
-        <a href="index.php?page=home" class="logo d-flex align-items-center">
+        <a class="logo d-flex align-items-center">
           <!-- Uncomment the line below if you also wish to use an image logo -->
-          <!-- <img src="assets/img/logo.png" alt=""> -->
-          <h1 class="sitename">Sayy Cafe</h1>
+          <h1 class="sitename">Seblak Say Cafe</h1>
+          <!-- <img src="assets/img/logo-seblak.png" alt=""> -->
         </a>
 
         <nav id="navmenu" class="navmenu">
           <ul>
-            <li><a href="index.php?page=home" class="active">Home</a></li>
+            <li><a href="#hero" class="active">Home</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="index.php?page=menu">Menu</a></li>
+            <li><a href="#menu">Menu</a></li>
             <li><a href="#chefs">Chefs</a></li>
             <li><a href="#gallery">Gallery</a></li>
             <li><a href="#contact">Contact</a></li>
@@ -85,18 +87,18 @@
       <div id="hero-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
 
         <div class="carousel-item active">
-          <img src="assets/img/hero-carousel/bg2.jpeg" alt="">
+          <img src="assets/img/hero-carousel/hero-carousel-1.jpg" alt="">
           <div class="carousel-container">
-            <h2><span>Seblak</span> Restaurant</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <h2><span>Seblak</span> Say Cafe</h2>
+            <p>Tempat sederhana yang berbicara lewat rasa dan suasana — tanpa banyak kata.</p>
             <div>
-              <a href="#menu" class="btn-get-started">Our Menu</a>
-              <a href="#book-a-table" class="btn-get-started">Book a table</a>
+              <!-- <a href="#menu" class="btn-get-started">Our Menu</a> -->
+              <a href="index.php?page=menu" class="btn-get-started">Pesan Sekarang</a>
             </div>
           </div>
         </div><!-- End Carousel Item -->
 
-        <div class="carousel-item">
+        <!-- <div class="carousel-item">
           <img src="assets/img/hero-carousel/bg1.jpg" alt="">
           <div class="carousel-container">
             <h2>At vero eos et accusamus</h2>
@@ -105,10 +107,10 @@
               <a href="#menu" class="btn-get-started">Our Menu</a>
               <a href="#book-a-table" class="btn-get-started">Book a table</a>
             </div>
-          </div>
+          </div>-->
         </div><!-- End Carousel Item -->
 
-        <div class="carousel-item">
+        <!--<div class="carousel-item">
           <img src="assets/img/hero-carousel/bg3.jpg" alt="">
           <div class="carousel-container">
             <h2>Temporibus autem quibusdam</h2>
@@ -117,16 +119,16 @@
               <a href="#menu" class="btn-get-started">Our Menu</a>
               <a href="#book-a-table" class="btn-get-started">Book a table</a>
             </div>
-          </div>
+          </div>-->
         </div><!-- End Carousel Item -->
 
-        <a class="carousel-control-prev" href="#hero-carousel" role="button" data-bs-slide="prev">
+        <!--<a class="carousel-control-prev" href="#hero-carousel" role="button" data-bs-slide="prev">
           <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
         </a>
 
         <a class="carousel-control-next" href="#hero-carousel" role="button" data-bs-slide="next">
           <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
-        </a>
+        </a>-->
 
         <ol class="carousel-indicators"></ol>
 
@@ -165,6 +167,125 @@
       </div>
 
     </section><!-- /About Section -->
+
+    <section id="menu" class="menu section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Menu</h2>
+        <div><span>Check Our Tasty</span> <span class="description-title">Menu</span></div>
+      </div><!-- End Section Title -->
+
+      <div class="container isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
+
+        <div class="row" data-aos="fade-up" data-aos-delay="100">
+          <div class="col-lg-12 d-flex justify-content-center">
+            <ul class="menu-filters isotope-filters">
+              <li data-filter="*" class="filter-active">All</li>
+              <li data-filter=".filter-starters">Starters</li>
+              <li data-filter=".filter-salads">Salads</li>
+              <li data-filter=".filter-specialty">Specialty</li>
+            </ul>
+          </div>
+        </div><!-- Menu Filters -->
+
+        <div class="row isotope-container" data-aos="fade-up" data-aos-delay="200">
+
+          <div class="col-lg-6 menu-item isotope-item filter-starters">
+            <img src="assets/img/menu/lobster-bisque.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Seblak Original</a><span>Rp. 16000</span>
+            </div>
+            <div class="menu-ingredients">
+              Lorem, deren, trataro, filede, nerada
+            </div>
+          </div><!-- Menu Item -->
+
+          <div class="col-lg-6 menu-item isotope-item filter-specialty">
+            <img src="assets/img/menu/bread-barrel.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Bread Barrel</a><span>$6.95</span>
+            </div>
+            <div class="menu-ingredients">
+              Lorem, deren, trataro, filede, nerada
+            </div>
+          </div><!-- Menu Item -->
+
+          <div class="col-lg-6 menu-item isotope-item filter-starters">
+            <img src="assets/img/menu/cake.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Crab Cake</a><span>$7.95</span>
+            </div>
+            <div class="menu-ingredients">
+              A delicate crab cake served on a toasted roll with lettuce and tartar sauce
+            </div>
+          </div><!-- Menu Item -->
+
+          <div class="col-lg-6 menu-item isotope-item filter-salads">
+            <img src="assets/img/menu/caesar.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Caesar Selections</a><span>$8.95</span>
+            </div>
+            <div class="menu-ingredients">
+              Lorem, deren, trataro, filede, nerada
+            </div>
+          </div><!-- Menu Item -->
+
+          <div class="col-lg-6 menu-item isotope-item filter-specialty">
+            <img src="assets/img/menu/tuscan-grilled.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Tuscan Grilled</a><span>$9.95</span>
+            </div>
+            <div class="menu-ingredients">
+              Grilled chicken with provolone, artichoke hearts, and roasted red pesto
+            </div>
+          </div><!-- Menu Item -->
+
+          <div class="col-lg-6 menu-item isotope-item filter-starters">
+            <img src="assets/img/menu/mozzarella.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Mozzarella Stick</a><span>$4.95</span>
+            </div>
+            <div class="menu-ingredients">
+              Lorem, deren, trataro, filede, nerada
+            </div>
+          </div><!-- Menu Item -->
+
+          <div class="col-lg-6 menu-item isotope-item filter-salads">
+            <img src="assets/img/menu/greek-salad.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Greek Salad</a><span>$9.95</span>
+            </div>
+            <div class="menu-ingredients">
+              Fresh spinach, crisp romaine, tomatoes, and Greek olives
+            </div>
+          </div><!-- Menu Item -->
+
+          <div class="col-lg-6 menu-item isotope-item filter-salads">
+            <img src="assets/img/menu/spinach-salad.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Spinach Salad</a><span>$9.95</span>
+            </div>
+            <div class="menu-ingredients">
+              Fresh spinach with mushrooms, hard boiled egg, and warm bacon vinaigrette
+            </div>
+          </div><!-- Menu Item -->
+
+          <div class="col-lg-6 menu-item isotope-item filter-specialty">
+            <img src="assets/img/menu/lobster-roll.jpg" class="menu-img" alt="">
+            <div class="menu-content">
+              <a href="#">Lobster Roll</a><span>$12.95</span>
+            </div>
+            <div class="menu-ingredients">
+              Plump lobster meat, mayo and crisp lettuce on a toasted bulky roll
+            </div>
+          </div><!-- Menu Item -->
+
+        </div><!-- Menu Container -->
+
+      </div>
+
+    </section>
 
     <!-- Why Us Section -->
     <section id="why-us" class="why-us section">
@@ -219,13 +340,14 @@
     <!-- /Events Section -->
 
     <!-- Book A Table Section -->
+    <!--
     <section id="book-a-table" class="book-a-table section">
 
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
+     
+       <div class="container section-title" data-aos="fade-up">
         <h2>Book A Table</h2>
         <div><span>Book a</span> <span class="description-title">Table</span></div>
-      </div><!-- End Section Title -->
+      </div> 
 
       <div class="container">
 
@@ -267,7 +389,7 @@
                 <button type="submit">Book a Table</button>
               </div>
             </form>
-          </div><!-- End Reservation Form -->
+          </div> < End Reservation Form -->
 
         </div>
 
@@ -372,17 +494,14 @@ if (count($karyawans) == 0) {
 }
 ?>
 
-<section id="chefs" class="chefs section-bg">
-  <div class="container">
 
-    <!-- Title sesuai template -->
-    <div class="section-header text-center mb-5" data-aos="fade-up">
-      <span class="subtitle-chef">CHEFS</span>
-      <h2 class="chef-title">Our <span>Professional</span> Chefs</h2>
-    </div>
+  <div class="container section-title" data-aos="fade-up">
+    <h2>Chefs</h2>
+    <div><span>Our Proffesional Chef</span></div>
+  </div><!-- End Section Title -->
 
     <div class="row gy-4">
-
+      
       <?php 
       $i = 1;
       foreach ($karyawans as $chef): 
@@ -622,7 +741,6 @@ if (count($karyawans) == 0) {
   </main>
 
   <footer id="footer" class="footer dark-background">
-    ...
     <div class="container copyright text-center mt-4">
       <p>© <span>Copyright</span> <strong class="px-1 sitename">Seblak Say Cafe</strong> <span>All Rights Reserved</span></p>
       <div class="credits">
@@ -639,7 +757,6 @@ if (count($karyawans) == 0) {
       </a>
       </div>
     </div>
-...
   </footer>
 
   <!-- Scroll Top -->
@@ -669,7 +786,7 @@ if (count($karyawans) == 0) {
 .admin-float-btn {
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  left: 20px;
   background: #ffca28;
   color: #000;
   width: 48px;
@@ -746,6 +863,27 @@ if (count($karyawans) == 0) {
 
 .section-header .chef-title span {
   color: #e8a73e;
+}
+
+/* === FIX PUTIH DI KANAN LAYAR & SCROLLBAR HORIZONTAL === */
+html, body {
+  overflow-x: hidden !important;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.hero, 
+.hero .carousel, 
+.hero .carousel-item, 
+section, 
+.container-fluid, 
+.row {
+  max-width: 100vw !important;
+  overflow-x: clip !important;
 }
 </style>
 

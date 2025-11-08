@@ -310,6 +310,7 @@ h6 {
   --background-color: rgba(21, 17, 13, 0.85);
 }
 
+
 /*--------------------------------------------------------------
 # Navigation Menu
 --------------------------------------------------------------*/
@@ -830,7 +831,7 @@ section,
 
 .hero .carousel-container {
   position: absolute;
-  inset: 90px 64px 64px 64px;
+  inset: 90px 5% 64px 5%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1085,14 +1086,13 @@ section,
 }
 
 .menu .menu-content::after {
-  content: "......................................................................" "...................................................................." "....................................................................";
+  content: "";
   position: absolute;
-  left: 20px;
-  right: 0;
   top: -4px;
-  z-index: 1;
-  color: color-mix(in srgb, var(--default-color), transparent 60%);
-  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--default-color), transparent 60%);
 }
 
 .menu .menu-content a {

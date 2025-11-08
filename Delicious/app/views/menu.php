@@ -138,15 +138,15 @@ include 'app/views/sections/header_nav.php';
     <?php if ($sold): ?><span class="label-soldout">Habis</span><?php endif; ?>
   </div>
   <h5><?= $menu['nama_menu']; ?></h5>
-  <div class="stok">Stok: <?= $stok ?></div>
+ <!-- <div class="stok">Stok: <?= $stok ?></div> -->
   <div class="harga">Rp <?= number_format($menu['harga']); ?></div>
 
   <?php if(!$sold): ?>
     <button class="btn-cart" onclick="addToCartPrompt('<?= $menu['id_menu']; ?>')"><i class="bi bi-cart-plus"></i> Tambah ke Keranjang</button>
-    <button class="btn-pesan btnPesan" data-id="<?= $menu['id_menu']; ?>" data-nama="<?= $menu['nama_menu']; ?>" data-harga="<?= $menu['harga']; ?>">Pesan Langsung</button>
+    <!--<button class="btn-pesan btnPesan" data-id="<?= $menu['id_menu']; ?>" data-nama="<?= $menu['nama_menu']; ?>" data-harga="<?= $menu['harga']; ?>">Pesan Langsung</button>-->
   <?php else: ?>
-    <button class="btn-cart disabled-btn">Stok Habis</button>
-    <button class="btn-pesan disabled-btn">Tidak Tersedia</button>
+    <button class="btn-cart disabled-btn">Tidak Tersedia</button>
+    <!--<button class="btn-pesan disabled-btn">Tidak Tersedia</button>-->
   <?php endif; ?>
 </div>
 <?php endforeach; ?>
@@ -169,7 +169,7 @@ function openCart(){
 }
 
 function addToCartPrompt(id){
-Swal.fire({title:'Berapa banyak?',input:'number',inputValue:1,inputAttributes:{min:1},showCancelButton:true,confirmButtonText:'Tambah'})
+Swal.fire({title:'Input Jumlah',input:'number',inputValue:1,inputAttributes:{min:1},showCancelButton:true,confirmButtonText:'Tambah'})
 .then(r=>{
     if(!r.isConfirmed)return;
     let f=document.createElement('form');
