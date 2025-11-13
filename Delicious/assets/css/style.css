@@ -11,46 +11,46 @@
 # Help: https://bootstrapmade.com/color-system/
 --------------------------------------------------------------*/
 /* Fonts */
-:root {
-  --default-font: "Roboto",  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --heading-font: "Satisfy",  sans-serif;
-  --nav-font: "Poppins",  sans-serif;
-}
+  :root {
+    --default-font: "Roboto",  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --heading-font: "Satisfy",  sans-serif;
+    --nav-font: "Poppins",  sans-serif;
+  }
 
-/* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
-:root { 
-  --background-color: #ffffff; /* Background color for the entire website, including individual sections */
-  --default-color: #444444; /* Default color used for the majority of the text content across the entire website */
-  --heading-color: #433f39; /* Color for headings, subheadings and title throughout the website */
-  --accent-color: #ffb03b; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
-  --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
-  --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
-}
+  /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
+  :root { 
+    --background-color: #ffffff; /* Background color for the entire website, including individual sections */
+    --default-color: #444444; /* Default color used for the majority of the text content across the entire website */
+    --heading-color: #433f39; /* Color for headings, subheadings and title throughout the website */
+    --accent-color: #ffb03b; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+    --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
+    --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
+  }
 
-/* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */
-:root {
-  --nav-color: #ffffff;  /* The default color of the main navmenu links */
-  --nav-hover-color: #ffb03b; /* Applied to main navmenu links when they are hovered over or active */
-  --nav-mobile-background-color: #ffffff; /* Used as the background color for mobile navigation menu */
-  --nav-dropdown-background-color: #ffffff; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
-  --nav-dropdown-color: #444444; /* Used for navigation links of the dropdown items in the navigation menu. */
-  --nav-dropdown-hover-color: #ffb03b; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
-}
+  /* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */
+  :root {
+    --nav-color: #ffffff;  /* The default color of the main navmenu links */
+    --nav-hover-color: #ffb03b; /* Applied to main navmenu links when they are hovered over or active */
+    --nav-mobile-background-color: #ffffff; /* Used as the background color for mobile navigation menu */
+    --nav-dropdown-background-color: #ffffff; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
+    --nav-dropdown-color: #444444; /* Used for navigation links of the dropdown items in the navigation menu. */
+    --nav-dropdown-hover-color: #ffb03b; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
+  }
 
-/* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
+  /* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
 
-.light-background {
-  --background-color: #fffaf3;
-  --surface-color: #ffffff;
-}
+  .light-background {
+    --background-color: #fffaf3;
+    --surface-color: #ffffff;
+  }
 
-.dark-background {
-  --background-color: #1e160d;
-  --default-color: #ffffff;
-  --heading-color: #ffffff;
-  --surface-color: #42301c;
-  --contrast-color: #ffffff;
-}
+  .dark-background {
+    --background-color: #1e160d;
+    --default-color: #ffffff;
+    --heading-color: #ffffff;
+    --surface-color: #42301c;
+    --contrast-color: #ffffff;
+  }
 
 /* Smooth scroll */
 :root {
@@ -326,10 +326,12 @@ h6 {
     display: flex;
     list-style: none;
     align-items: center;
+    justify-items: start;
   }
 
   .navmenu li {
     position: relative;
+    
   }
 
   .navmenu a,
@@ -344,6 +346,14 @@ h6 {
     justify-content: space-between;
     white-space: nowrap;
     transition: 0.3s;
+  }
+
+  .navmenu {
+  position: fixed;  /* agar tetap di tempat saat scroll */
+  top: 0;
+  right: 80px;
+  padding: 10px 10px;
+  z-index: 1000;
   }
 
   .navmenu a i,
@@ -1126,6 +1136,14 @@ section,
   color: color-mix(in srgb, var(--default-color), transparent 50%);
 }
 
+:root{
+  --accent: #f9a326; /* warna oranye border */
+  --accent-hover: #ffb84d;
+  --btn-radius: 40px;
+  --btn-padding: 12px 36px;
+  --btn-font-size: 18px;
+}
+
 /*--------------------------------------------------------------
 # Specials Section
 --------------------------------------------------------------*/
@@ -1664,5 +1682,108 @@ section,
 }
 
 /*--------------------------------------------------------------
-# Starter Section Section
+# Tombol Admin
 --------------------------------------------------------------*/
+.admin-float-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: #ffca28;
+  color: #000;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 22px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+  transition: .3s ease;
+  z-index: 9999;
+  opacity: 0.25; /* jadi rahasia */
+}
+.admin-float-btn:hover {
+  background: #ffb300;
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.chef-member {
+  text-align: center;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(0,0,0,0.08);
+  padding-bottom: 20px;
+  transition: .3s;
+}
+.chef-member:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.section-header h2 {
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.section-header p {
+  margin-bottom: 0;
+  font-size: 18px;
+  color: #6c757d;
+}
+
+.section-header span {
+  color: #ffb03b;
+}
+
+.section-header .subtitle-chef {
+  display: inline-block;
+  background: #fff6e6;
+  padding: 8px 22px;
+  font-size: 14px;
+  border-radius: 30px;
+  color: #e8a73e;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.section-header .chef-title {
+  font-family: "Playfair Display", serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: #3b3b3b;
+  margin-bottom: 10px;
+}
+
+.section-header .chef-title span {
+  color: #e8a73e;
+}
+
+/* === FIX PUTIH DI KANAN LAYAR & SCROLLBAR HORIZONTAL === */
+html, body {
+  overflow-x: hidden !important;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.hero, 
+.hero .carousel, 
+.hero .carousel-item, 
+section, 
+.container-fluid, 
+.row {
+  max-width: 100vw !important;
+  overflow-x: clip !important;
+}
+

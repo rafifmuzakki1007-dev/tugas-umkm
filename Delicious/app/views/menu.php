@@ -1,4 +1,9 @@
 <title>Menu | Seblak Say cafe</title>
+<link href="assets/img/logo1.png" rel="icon">
+<link href="assets/img/logo1.png" rel="apple-touch-icon">
+<link href="assets/css/style.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 
@@ -100,12 +105,8 @@ include 'app/views/sections/header_nav.php';
 <div class="page-wrapper">
 <div class="container my-5" data-aos="fade-up">
 
-<div class="text-center mb-5">
-  <h2 class="fw-bold">Menu Kami</h2>
-  <p class="text-muted">Pilih menu favoritmu 🍽️</p>
-</div>
 
-<div class="modal fade" id="cartModal"><div class="modal-dialog modal-lg"><div class="modal-content">
+<!-- <div class="modal fade" id="cartModal"><div class="modal-dialog modal-lg"><div class="modal-content">
   <div class="modal-header bg-warning"><h5 class="fw-bold"><i class="bi bi-cart"></i> Keranjang</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body" id="cartContent"><div class="text-center py-5">Memuat...</div></div>
 </div></div></div>
@@ -127,7 +128,7 @@ include 'app/views/sections/header_nav.php';
 </select></div>
 </div>
 <div class="modal-footer"><button class="btn btn-warning fw-bold">Pesan Sekarang</button></div>
-</form></div></div></div>
+</form></div></div></div> -->
 
 <div class="menu-card-wrapper">
 <?php foreach ($menus as $menu):
@@ -138,21 +139,81 @@ include 'app/views/sections/header_nav.php';
     <?php if ($sold): ?><span class="label-soldout">Habis</span><?php endif; ?>
   </div>
   <h5><?= $menu['nama_menu']; ?></h5>
- <!-- <div class="stok">Stok: <?= $stok ?></div> -->
   <div class="harga">Rp <?= number_format($menu['harga']); ?></div>
 
   <?php if(!$sold): ?>
     <button class="btn-cart" onclick="addToCartPrompt('<?= $menu['id_menu']; ?>')"><i class="bi bi-cart-plus"></i> Tambah ke Keranjang</button>
-    <!--<button class="btn-pesan btnPesan" data-id="<?= $menu['id_menu']; ?>" data-nama="<?= $menu['nama_menu']; ?>" data-harga="<?= $menu['harga']; ?>">Pesan Langsung</button>-->
   <?php else: ?>
     <button class="btn-cart disabled-btn">Tidak Tersedia</button>
-    <!--<button class="btn-pesan disabled-btn">Tidak Tersedia</button>-->
   <?php endif; ?>
 </div>
 <?php endforeach; ?>
 </div>
 
 </div></div>
+
+<footer id="footer" class="footer dark-background">
+
+    <div class="container">
+      <div class="row gy-3">
+        <div class="col-lg-3 col-md-6 d-flex">
+          <i class="bi bi-geo-alt icon"></i>
+          <div class="address">
+            <h4>Address</h4>
+             <p>Jl. Warujayeng - Kediri, RT.02/RW.06, Krajan Selatan, Kampungbaru, Kec. Tanjunganom, Kabupaten Nganjuk, Jawa Timur 64482
+</p>
+            <p></p>
+          </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 d-flex">
+          <i class="bi bi-telephone icon"></i>
+          <div>
+            <h4>Contact</h4>
+            <p>
+              <strong>Phone:</strong> <span>+1 5589 55488 55</span><br>
+              <strong>Email:</strong> <span>info@example.com</span><br>
+            </p>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 d-flex">
+          <i class="bi bi-clock icon"></i>
+          <div>
+            <h4>Opening Hours</h4>
+            <p>
+              <strong>Mon-Sat:</strong> <span>11AM - 23PM</span><br>
+              <strong>Sunday</strong>: <span>Closed</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <h4>Follow Us</h4>
+          <div class="social-links d-flex">
+            <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Seblak Say Cafe</strong> <span>All Rights Reserved</span></p>
+     Designed by 
+      <a href="#" onclick="window.location='index.php?page=dashboard'" style="opacity:0.2; color:#ffca28; text-decoration:none;"
+        onmouseover="this.style.opacity=1" 
+        onmouseout="this.style.opacity=0.2">
+      Nothing
+      </a>
+      </div>
+    </div>
+
+  </footer>
 
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/aos/aos.js"></script>

@@ -8,8 +8,8 @@
   <meta name="keywords" content="">
   
   <!-- Favicons -->
-  <link href="assets/img/logo-seblak-sementara.png" rel="icon">
-  <link href="assets/img/logo-seblak-sementara.png" rel="apple-touch-icon">
+  <link href="assets/img/logo1.png" rel="icon">
+  <link href="assets/img/logo1.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -24,8 +24,9 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/custom.css">
 
   <!-- =======================================================
   * Template Name: Delicious
@@ -43,39 +44,25 @@
     <div class="topbar d-flex align-items-center">
       <div class="container d-flex justify-content-end justify-content-md-between">
         <div class="contact-info d-flex align-items-center">
-          <!-- <i class="bi bi-phone d-flex align-items-center d-none d-lg-block"><span>+62 8129-0966-363</span></i> -->
+          <img src="assets/img/logo1.png" alt="" width="100px" height="100%" id="logo-img">
           <i class="bi bi-clock ms-4 d-none d-lg-flex align-items-center"><span>everyday: 10:00 AM - 22.00 PM</span></i>
-          <a href=""><i class="bi bi-whatsapp ms-4 d-none d-lg-flex align-items-center"><span>+62 8129-0966-363</span></i></a>
-          <a href="https://www.tiktok.com/@seblakprasmanansaycafe?is_from_webapp=1&sender_device=pc"><i class="bi bi-tiktok ms-4 d-none d-lg-flex align-items-center"></i></a>
-        </div>
-        <!-- <a href="#book-a-table" class="cta-btn">Booka a table</a> -->
-      </div>
-    </div><!-- End Top Bar -->
-
-    <div class="branding d-flex align-items-cente">
-
-      <div class="container position-relative d-flex align-items-center justify-content-between">
-        <a class="logo d-flex align-items-center">
-          <!-- Uncomment the line below if you also wish to use an image logo -->
-          <h1 class="sitename">Seblak Say Cafe</h1>
-          <!-- <img src="assets/img/logo-seblak.png" alt=""> -->
-        </a>
+    </div>
 
         <nav id="navmenu" class="navmenu">
           <ul>
             <li><a href="#hero" class="active">Home</a></li>
-            <li><a href="#about">About</a></li>
+            <li><a href="#about">Tentang</a></li>
             <li><a href="#menu">Menu</a></li>
-            <li><a href="#chefs">Chefs</a></li>
+            <li><a href="#chefs">Member</a></li>
             <li><a href="#gallery">Gallery</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li><a href="#contact">Lokasi</a></li>
+            
+        <a href="index.php?page=menu" class="cta-btn" id="order-btn">Order Online</a>
+      
           </ul>
           <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
         </nav>
-
-      </div>
-
-    </div>
+      
 
   </header>
 
@@ -87,51 +74,13 @@
       <div id="hero-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
 
         <div class="carousel-item active">
-          <img src="assets/img/hero-carousel/hero-carousel-1.jpg" alt="">
+          <img src="assets/img/hero-carousel/bg-login.jpg" alt="">
           <div class="carousel-container">
             <h2><span>Seblak</span> Say Cafe</h2>
             <p>Tempat sederhana yang berbicara lewat rasa dan suasana — tanpa banyak kata.</p>
-            <div>
-              <!-- <a href="#menu" class="btn-get-started">Our Menu</a> -->
-              <a href="index.php?page=menu" class="btn-get-started">Pesan Sekarang</a>
-            </div>
+            
           </div>
-        </div><!-- End Carousel Item -->
-
-        <!-- <div class="carousel-item">
-          <img src="assets/img/hero-carousel/bg1.jpg" alt="">
-          <div class="carousel-container">
-            <h2>At vero eos et accusamus</h2>
-            <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut.</p>
-            <div>
-              <a href="#menu" class="btn-get-started">Our Menu</a>
-              <a href="#book-a-table" class="btn-get-started">Book a table</a>
-            </div>
-          </div>-->
-        </div><!-- End Carousel Item -->
-
-        <!--<div class="carousel-item">
-          <img src="assets/img/hero-carousel/bg3.jpg" alt="">
-          <div class="carousel-container">
-            <h2>Temporibus autem quibusdam</h2>
-            <p>Beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt omnis iste natus error sit voluptatem accusantium.</p>
-            <div>
-              <a href="#menu" class="btn-get-started">Our Menu</a>
-              <a href="#book-a-table" class="btn-get-started">Book a table</a>
-            </div>
-          </div>-->
-        </div><!-- End Carousel Item -->
-
-        <!--<a class="carousel-control-prev" href="#hero-carousel" role="button" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
-        </a>
-
-        <a class="carousel-control-next" href="#hero-carousel" role="button" data-bs-slide="next">
-          <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
-        </a>-->
-
-        <ol class="carousel-indicators"></ol>
-
+        </div><!-- End Carousel Item -->  
       </div>
 
     </section><!-- /Hero Section -->
@@ -144,17 +93,17 @@
         <div class="row gy-4">
           <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="100">
             <img src="assets/img/about.jpg" class="img-fluid" alt="">
-            <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" class="glightbox pulsating-play-btn"></a>
+            <!-- <a href="https://www.tiktok.com/@seblakprasmanansaycafe/video/7404134925936381190?is_from_webapp=1&sender_device=pc" class="glightbox pulsating-play-btn"></a> -->
           </div>
           <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="200">
-            <h3>Voluptatem dignissimos provident quasi corporis voluptates sit assumenda.</h3>
+            <h3>About Us <span class="description-title">Seblak</span> Say Cafe.</h3>
             <p class="fst-italic">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-              magna aliqua.
+              Berdiri pada tahun 2022, Seblak Say Cafe menjadi salah satu tempat nyeblak paling digemari di warujayeng
+              . Alasan mengapa seblak ini digemari :
             </p>
             <ul>
-              <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></li>
-              <li><i class="bi bi-check2-all"></i> <span>Duis aute irure dolor in reprehenderit in voluptate velit.</span></li>
+              <li><i class="bi bi-check2-all"></i> <span>Suasana yang Nyaman,Tenang dan Santai</span></li>
+              <li><i class="bi bi-check2-all"></i> <span>Rasa Seblak Gurih</span></li>
               <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate trideta storacalaperda mastiro dolore eu fugiat nulla pariatur.</span></li>
             </ul>
             <p>
@@ -172,128 +121,34 @@
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Menu</h2>
-        <div><span>Check Our Tasty</span> <span class="description-title">Menu</span></div>
+        <!-- <h2>Menu</h2> -->
+        <div><span>Varian</span> <span class="description-title">Menu</span> <span>Kami</span></div>
       </div><!-- End Section Title -->
 
-      <div class="container isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
-
-        <div class="row" data-aos="fade-up" data-aos-delay="100">
-          <div class="col-lg-12 d-flex justify-content-center">
-            <ul class="menu-filters isotope-filters">
-              <li data-filter="*" class="filter-active">All</li>
-              <li data-filter=".filter-starters">Starters</li>
-              <li data-filter=".filter-salads">Salads</li>
-              <li data-filter=".filter-specialty">Specialty</li>
-            </ul>
-          </div>
-        </div><!-- Menu Filters -->
-
-        <div class="row isotope-container" data-aos="fade-up" data-aos-delay="200">
-
-          <div class="col-lg-6 menu-item isotope-item filter-starters">
-            <img src="assets/img/menu/lobster-bisque.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Seblak Original</a><span>Rp. 16000</span>
-            </div>
-            <div class="menu-ingredients">
-              Lorem, deren, trataro, filede, nerada
-            </div>
-          </div><!-- Menu Item -->
-
-          <div class="col-lg-6 menu-item isotope-item filter-specialty">
-            <img src="assets/img/menu/bread-barrel.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Bread Barrel</a><span>$6.95</span>
-            </div>
-            <div class="menu-ingredients">
-              Lorem, deren, trataro, filede, nerada
-            </div>
-          </div><!-- Menu Item -->
-
-          <div class="col-lg-6 menu-item isotope-item filter-starters">
-            <img src="assets/img/menu/cake.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Crab Cake</a><span>$7.95</span>
-            </div>
-            <div class="menu-ingredients">
-              A delicate crab cake served on a toasted roll with lettuce and tartar sauce
-            </div>
-          </div><!-- Menu Item -->
-
-          <div class="col-lg-6 menu-item isotope-item filter-salads">
-            <img src="assets/img/menu/caesar.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Caesar Selections</a><span>$8.95</span>
-            </div>
-            <div class="menu-ingredients">
-              Lorem, deren, trataro, filede, nerada
-            </div>
-          </div><!-- Menu Item -->
-
-          <div class="col-lg-6 menu-item isotope-item filter-specialty">
-            <img src="assets/img/menu/tuscan-grilled.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Tuscan Grilled</a><span>$9.95</span>
-            </div>
-            <div class="menu-ingredients">
-              Grilled chicken with provolone, artichoke hearts, and roasted red pesto
-            </div>
-          </div><!-- Menu Item -->
-
-          <div class="col-lg-6 menu-item isotope-item filter-starters">
-            <img src="assets/img/menu/mozzarella.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Mozzarella Stick</a><span>$4.95</span>
-            </div>
-            <div class="menu-ingredients">
-              Lorem, deren, trataro, filede, nerada
-            </div>
-          </div><!-- Menu Item -->
-
-          <div class="col-lg-6 menu-item isotope-item filter-salads">
-            <img src="assets/img/menu/greek-salad.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Greek Salad</a><span>$9.95</span>
-            </div>
-            <div class="menu-ingredients">
-              Fresh spinach, crisp romaine, tomatoes, and Greek olives
-            </div>
-          </div><!-- Menu Item -->
-
-          <div class="col-lg-6 menu-item isotope-item filter-salads">
-            <img src="assets/img/menu/spinach-salad.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Spinach Salad</a><span>$9.95</span>
-            </div>
-            <div class="menu-ingredients">
-              Fresh spinach with mushrooms, hard boiled egg, and warm bacon vinaigrette
-            </div>
-          </div><!-- Menu Item -->
-
-          <div class="col-lg-6 menu-item isotope-item filter-specialty">
-            <img src="assets/img/menu/lobster-roll.jpg" class="menu-img" alt="">
-            <div class="menu-content">
-              <a href="#">Lobster Roll</a><span>$12.95</span>
-            </div>
-            <div class="menu-ingredients">
-              Plump lobster meat, mayo and crisp lettuce on a toasted bulky roll
-            </div>
-          </div><!-- Menu Item -->
-
-        </div><!-- Menu Container -->
-
-      </div>
-
+      <div class="menu-card-wrapper">
+<?php foreach ($menus as $menu):
+  $stok = $menu['stok'];?>
+<div class="menu-card <?= $sold?'sold-out':'' ?>">
+  <div style="position:relative;">
+    <img src="assets/img/menu/<?= $menu['gambar']; ?>">
+    
+  </div>
+  <h5><?= $menu['nama_menu']; ?></h5>
+</div>
+<?php endforeach; ?>
+</div>
+      
     </section>
+    
+
 
     <!-- Why Us Section -->
     <section id="why-us" class="why-us section">
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Why Us</h2>
-        <div><span>Why choose</span> <span class="description-title">Our Restaurant</span></div>
+        <!-- <h2>Why Us</h2> -->
+        <div><span>Why choose</span> <span class="description-title">Seblak Say Cafe</span></div>
       </div><!-- End Section Title -->
 
       <div class="container">
@@ -304,7 +159,7 @@
             <div class="card-item">
               <span>01</span>
               <h4><a href="" class="stretched-link">Lorem Ipsum</a></h4>
-              <p>Ulamco laboris nisi ut aliquip ex ea commodo consequat. Et consectetur ducimus vero placeat</p>
+              <p>Tempat yang nyaman</p>
             </div>
           </div><!-- Card Item -->
 
@@ -330,72 +185,112 @@
 
     </section><!-- /Why Us Section -->
 
-    <!-- Menu Section -->
-    <!-- /Menu Section -->
 
-    <!-- Specials Section -->
-    <!-- /Specials Section -->
 
-    <!-- Events Section -->
-    <!-- /Events Section -->
 
-    <!-- Book A Table Section -->
-    <!--
-    <section id="book-a-table" class="book-a-table section">
+ <section id="chefs" class="chefs section">
 
-     
-       <div class="container section-title" data-aos="fade-up">
-        <h2>Book A Table</h2>
-        <div><span>Book a</span> <span class="description-title">Table</span></div>
-      </div> 
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        
+        <div><span>Our </span> <span class="description-title">Members</span></div>
+      </div><!-- End Section Title -->
 
       <div class="container">
 
-        <div class="row g-0" data-aos="fade-up" data-aos-delay="100">
+        <div class="row gy-5">
 
-          <div class="col-lg-4 reservation-img" style="background-image: url(assets/img/reservation.jpg);"></div>
-
-          <div class="col-lg-8 d-flex align-items-center reservation-form-bg" data-aos="fade-up" data-aos-delay="200">
-            <form action="forms/book-a-table.php" method="post" role="form" class="php-email-form">
-              <div class="row gy-4">
-                <div class="col-lg-4 col-md-6">
-                  <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required="">
-                </div>
-                <div class="col-lg-4 col-md-6">
-                  <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" required="">
-                </div>
-                <div class="col-lg-4 col-md-6">
-                  <input type="text" class="form-control" name="phone" id="phone" placeholder="Your Phone" required="">
-                </div>
-                <div class="col-lg-4 col-md-6">
-                  <input type="date" name="date" class="form-control" id="date" placeholder="Date" required="">
-                </div>
-                <div class="col-lg-4 col-md-6">
-                  <input type="time" class="form-control" name="time" id="time" placeholder="Time" required="">
-                </div>
-                <div class="col-lg-4 col-md-6">
-                  <input type="number" class="form-control" name="people" id="people" placeholder="# of people" required="">
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="member">
+              <div class="pic"><img src="assets/img/chefs/member1.png" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>Walter White</h4>
+                
+                <div class="social">
+                  
+                  <a href=""><i class="bi bi-tiktok"></i></a>
+                  <a href=""><i class="bi bi-instagram"></i></a>
+                  
                 </div>
               </div>
+            </div>
+          </div><!-- End Team Member -->
 
-              <div class="form-group mt-3">
-                <textarea class="form-control" name="message" rows="5" placeholder="Message"></textarea>
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="member">
+              <div class="pic"><img src="assets/img/chefs/member2.png" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>Sarah Jhonson</h4>
+                
+                <div class="social">
+                  <a href=""><i class="bi bi-tiktok"></i></a>
+                  <a href=""><i class="bi bi-instagram"></i></a>
+                </div>
               </div>
+            </div>
+          </div><!-- End Team Member -->
 
-              <div class="text-center mt-3">
-                <div class="loading">Loading</div>
-                <div class="error-message"></div>
-                <div class="sent-message">Your booking request was sent. We will call back or send an Email to confirm your reservation. Thank you!</div>
-                <button type="submit">Book a Table</button>
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="member">
+              <div class="pic"><img src="assets/img/chefs/member3.png" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>William Anderson</h4>
+                
+                <div class="social">
+                  <a href=""><i class="bi bi-tiktok"></i></a>
+                  <a href=""><i class="bi bi-instagram"></i></a>
+                </div>
               </div>
-            </form>
-          </div> < End Reservation Form -->
+            </div>
+          </div><!-- End Team Member -->
 
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="member">
+              <div class="pic"><img src="assets/img/chefs/member4.png" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>William Anderson</h4>
+                
+                <div class="social">
+                  <a href=""><i class="bi bi-tiktok"></i></a>
+                  <a href=""><i class="bi bi-instagram"></i></a>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Team Member -->
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="member">
+              <div class="pic"><img src="assets/img/chefs/member7.png" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>William Anderson</h4>
+                
+                <div class="social">
+                  <a href=""><i class="bi bi-tiktok"></i></a>
+                  <a href=""><i class="bi bi-instagram"></i></a>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Team Member -->
+
+          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="member">
+              <div class="pic"><img src="assets/img/chefs/member6.png" class="img-fluid" alt=""></div>
+              <div class="member-info">
+                <h4>William Anderson</h4>
+                
+                <div class="social">
+                  <a href=""><i class="bi bi-tiktok"></i></a>
+                  <a href=""><i class="bi bi-instagram"></i></a>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Team Member -->
         </div>
 
       </div>
 
-    </section><!-- /Book A Table Section -->
+    </section><!-- /Chefs Section -->
+
 
     <!-- Gallery Section -->
     <section id="gallery" class="gallery section">
@@ -403,7 +298,7 @@
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
         <h2>Gallery</h2>
-        <div><span>Some photos from</span> <span class="description-title">Our Restaurant</span></div>
+        <div><span>Gallery</span> <span class="description-title">Kami</span></div>
       </div><!-- End Section Title -->
 
       <div class="container-fluid" data-aos="fade-up" data-aos-delay="100">
@@ -480,67 +375,7 @@
 
     </section><!-- /Gallery Section -->
 
-    <!-- Chefs Section -->
-<?php 
-// Fallback jika DB kosong
-$karyawans = $karyawans ?? [];
 
-if (count($karyawans) == 0) {
-  $karyawans = [
-    ["foto" => "chefs-1.jpg", "nama" => "Walter White", "jabatan" => "Master Chef"],
-    ["foto" => "chefs-2.jpg", "nama" => "Sarah Jhonson", "jabatan" => "Patissier"],
-    ["foto" => "chefs-3.jpg", "nama" => "William Anderson", "jabatan" => "Cook"],
-  ];
-}
-?>
-
-
-  <div class="container section-title" data-aos="fade-up">
-    <h2>Chefs</h2>
-    <div><span>Our Proffesional Chef</span></div>
-  </div><!-- End Section Title -->
-
-    <div class="row gy-4">
-      
-      <?php 
-      $i = 1;
-      foreach ($karyawans as $chef): 
-        $foto = $chef['foto'] ?? "chefs-$i.jpg"; 
-        $nama = $chef['nama'] ?? ($chef['nama_karyawan'] ?? 'Nama Tidak Ada');
-        $jabatan = $chef['jabatan'] ?? ($chef['posisi'] ?? 'Chef');
-      ?>
-
-      <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="<?= $i*100 ?>">
-        <div class="chef-member">
-
-          <div class="member-img">
-            <img src="assets/img/chefs/<?= $foto ?>" class="img-fluid" style="height:350px; width:100%; object-fit:cover;" alt="">
-            <div class="social">
-              <a href="#"><i class="bi bi-twitter"></i></a>
-              <a href="#"><i class="bi bi-facebook"></i></a>
-              <a href="#"><i class="bi bi-instagram"></i></a>
-              <a href="#"><i class="bi bi-linkedin"></i></a>
-            </div>
-          </div>
-
-          <div class="member-info">
-            <h4><?= $nama ?></h4>
-            <span><?= ucfirst($jabatan) ?></span>
-          </div>
-
-        </div>
-      </div>
-
-      <?php 
-      $i++;
-      endforeach; 
-      ?>
-
-    </div>
-
-  </div>
-</section>
-<!-- /Chefs Section -->
 
     <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials section dark-background">
@@ -660,12 +495,12 @@ if (count($karyawans) == 0) {
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Contact</h2>
-        <div><span>Check Our</span> <span class="description-title">Contact</span></div>
+        <!-- <h2>Contact</h2> -->
+        <div><span>Kunjungi </span><span class="description-title">Seblak Say Cafe</div>
       </div><!-- End Section Title -->
 
       <div class="mb-5">
-        <iframe style="width: 100%; height: 400px;" src="https://maps.app.goo.gl/ifLRqEZTThR2c97v5 " frameborder="0" allowfullscreen=""></iframe>
+       <iframe style="width: 100%; height: 400px;" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.318951464519!2d112.01129887481696!3d-7.648810892367321!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e784f0048ac8ce5%3A0x99f1db18d32fb436!2sSeblak%20SAY%20Cafe!5e0!3m2!1sid!2sid!4v1762855183435!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div><!-- End Google Maps -->
 
       <div class="container" data-aos="fade">
@@ -738,18 +573,61 @@ if (count($karyawans) == 0) {
 
     </section><!-- /Contact Section -->
 
-  </main>
 
-  <footer id="footer" class="footer dark-background">
+
+    <footer id="footer" class="footer dark-background">
+
+    <div class="container">
+      <div class="row gy-3">
+        <div class="col-lg-3 col-md-6 d-flex">
+          <i class="bi bi-geo-alt icon"></i>
+          <div class="address">
+            <h4>Address</h4>
+             <p>Jl. Warujayeng - Kediri, RT.02/RW.06, Krajan Selatan, Kampungbaru, Kec. Tanjunganom, Kabupaten Nganjuk, Jawa Timur 64482
+</p>
+            <p></p>
+          </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 d-flex">
+          <i class="bi bi-telephone icon"></i>
+          <div>
+            <h4>Contact</h4>
+            <p>
+              <strong>Phone:</strong> <span>+1 5589 55488 55</span><br>
+              <strong>Email:</strong> <span>info@example.com</span><br>
+            </p>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 d-flex">
+          <i class="bi bi-clock icon"></i>
+          <div>
+            <h4>Opening Hours</h4>
+            <p>
+              <strong>Mon-Sat:</strong> <span>11AM - 23PM</span><br>
+              <strong>Sunday</strong>: <span>Closed</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <h4>Follow Us</h4>
+          <div class="social-links d-flex">
+            <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <div class="container copyright text-center mt-4">
       <p>© <span>Copyright</span> <strong class="px-1 sitename">Seblak Say Cafe</strong> <span>All Rights Reserved</span></p>
-      <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you've purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-
-      Designed by 
+     Designed by 
       <a href="#" onclick="window.location='index.php?page=dashboard'" style="opacity:0.2; color:#ffca28; text-decoration:none;"
         onmouseover="this.style.opacity=1" 
         onmouseout="this.style.opacity=0.2">
@@ -757,6 +635,7 @@ if (count($karyawans) == 0) {
       </a>
       </div>
     </div>
+
   </footer>
 
   <!-- Scroll Top -->
@@ -781,111 +660,67 @@ if (count($karyawans) == 0) {
 <a href="index.php?page=dashboard" class="admin-float-btn">
   <i class="bi bi-shield-lock"></i>
 </a>
-
 <style>
-.admin-float-btn {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  background: #ffca28;
-  color: #000;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 22px;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-  transition: .3s ease;
-  z-index: 9999;
-  opacity: 0.25; /* jadi rahasia */
+/* CARD MENU HOVER ANIMATION */
+.menu-card {
+  width:230px;
+  background:#fff;
+  border-radius:14px;
+  padding:18px;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  transition: .25s;
+  opacity:0;
+  animation:fadeUp .5s ease forwards;
 }
-.admin-float-btn:hover {
-  background: #ffb300;
+
+.menu-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+
+/* animasi zoom gambar waktu hover */
+.menu-card img {
+  width:140px;
+  height:140px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:12px;
+  transition: .25s ease;
+}
+
+.menu-card:hover img{
+  transform: scale(1.08);
+}
+
+.menu-card img{
+  transition: .25s ease;
+}
+.menu-card:hover img{
   transform: scale(1.1);
-  opacity: 1;
+  filter: brightness(1.05);
 }
-
-.chef-member {
-  text-align: center;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 0 25px rgba(0,0,0,0.08);
-  padding-bottom: 20px;
-  transition: .3s;
-}
-.chef-member:hover {
+.menu-card:hover{
   transform: translateY(-8px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  transition: .25s ease;
 }
 
-.section-header h2 {
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.section-header p {
-  margin-bottom: 0;
-  font-size: 18px;
-  color: #6c757d;
-}
-
-.section-header span {
-  color: #ffb03b;
-}
-
-.section-header .subtitle-chef {
-  display: inline-block;
-  background: #fff6e6;
-  padding: 8px 22px;
-  font-size: 14px;
-  border-radius: 30px;
-  color: #e8a73e;
-  font-weight: 600;
-  margin-bottom: 10px;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-}
-
-.section-header .chef-title {
-  font-family: "Playfair Display", serif;
-  font-size: 42px;
-  font-weight: 700;
-  color: #3b3b3b;
-  margin-bottom: 10px;
-}
-
-.section-header .chef-title span {
-  color: #e8a73e;
-}
-
-/* === FIX PUTIH DI KANAN LAYAR & SCROLLBAR HORIZONTAL === */
-html, body {
-  overflow-x: hidden !important;
-  width: 100%;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-}
-
-.hero, 
-.hero .carousel, 
-.hero .carousel-item, 
-section, 
-.container-fluid, 
-.row {
-  max-width: 100vw !important;
-  overflow-x: clip !important;
-}
+.menu-card-wrapper { display:flex; flex-wrap:wrap; gap:25px; justify-content:center; }
+.menu-card { width:230px; background:#fff; border-radius:14px; padding:18px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,.08); transition:.25s; opacity:0; animation:fadeUp .5s ease forwards; }
+.menu-card:hover{ transform:translateY(-6px); box-shadow:0 10px 24px rgba(0,0,0,.12); }
+.menu-card img{ width:140px; height:140px; object-fit:cover; border-radius:12px; margin-bottom:12px; transition:.25s;}
+.menu-card h5{font-size:1.05rem; font-weight:600;}
+.menu-card .stok{font-size:.9rem; color:#666;}
+.menu-card .harga{color:#e6a400; font-weight:700;}
+.btn-cart, .btn-pesan{ margin-top:10px; width:100%; padding:10px; border-radius:8px; border:none; font-weight:600; transition:.2s;}
+.btn-cart{ background:#fff; border:2px solid #ffca28; }
+.btn-cart:hover{ background:#ffca28; }
+.btn-pesan{ background:#ffc107; color:#fff; }
+.btn-pesan:hover{ background:#ffca2c; }
+.menu-card.sold-out img { filter: grayscale(100%) brightness(65%); }
+.label-soldout { position:absolute; top:8px; left:8px; background:rgba(200,0,0,.95); color:#fff; font-weight:700; font-size:.8rem; padding:5px 10px; border-radius:6px;}
+.disabled-btn{ background:#ccc !important; color:#555 !important; cursor:not-allowed; }
+@keyframes fadeUp { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
 </style>
-
 </body>
 </html>

@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+<link href="assets/css/style.css" rel="stylesheet">
 
 <?php 
 if(!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
@@ -19,24 +20,14 @@ $cartCount = array_sum($_SESSION['cart']);
 </div>
 
 <header id="header" class="header fixed-top">
-
-  <!--<div class="topbar d-flex align-items-center bg-light py-1 border-bottom">
-    <div class="container d-flex justify-content-between">
-      <div class="contact-info small">
-        <i class="bi bi-phone"></i> +62 8129-0966-363  
-        <span class="ms-3"><i class="bi bi-clock"></i> Everyday: 10:00-22:00</span>
-      </div>
-      <a href="#" class="btn btn-warning rounded-pill px-4 py-1 fw-semibold shadow-sm">Book a table</a>-->
     </div>
   </div>
 
   <div class="bg-dark text-white shadow-sm">
     <div class="container d-flex align-items-center justify-content-between py-2">
 
-    <p class="text-white text-decoration-none fw-bold fs-4"> Seblak Say Cafe</p>
-
-      <!-- <a href="index.php" class="text-white text-decoration-none fw-bold fs-4">Seblak Sayy Cafe</a> -->
-
+    <img src="assets/img/logo1.png" alt="logo seblak say cafe" width="90px" height="100%">
+    
       <?php if(isset($_SESSION['admin'])): ?>
       <form method="GET" action="index.php" class="d-none d-md-flex align-items-center" style="width:300px;">
         <input type="hidden" name="page" value="menu_admin">
