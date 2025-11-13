@@ -185,111 +185,74 @@
 
     </section><!-- /Why Us Section -->
 
+<!-- Chefs Section -->
+<?php 
+// Fallback jika DB kosong
+$karyawans = $karyawans ?? [];
 
+if (count($karyawans) == 0) {
+  $karyawans = [
+    ["foto" => "foto-1.png", "nama" => "Walter White", "jabatan" => ""],
+    ["foto" => "foto-2.png", "nama" => "Sarah Jhonson", "jabatan" => ""],
+    ["foto" => "foto-3.png", "nama" => "William Anderson", "jabatan" => ""],
+    ["foto" => "foto-4.png", "nama" => "William Anderson", "jabatan" => ""],
+    ["foto" => "foto-5.png", "nama" => "William Anderson", "jabatan" => ""],
+    ["foto" => "foto-6.png", "nama" => "William Anderson", "jabatan" => ""],
+    ["foto" => "foto-7.png", "nama" => "William Anderson", "jabatan" => ""],
+  ];
+}
+?>
 
+<section id="chefs" class="chefs section-bg">
+  <div class="container">
 
- <section id="chefs" class="chefs section">
+    <!-- Title sesuai template -->
+    <div class="section-header text-center mb-5" data-aos="fade-up">
+      <span class="subtitle-chef">CHEFS</span>
+      <h2 class="chef-title">Our <span>Professional</span> Chefs</h2>
+    </div>
 
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        
-        <div><span>Our </span> <span class="description-title">Members</span></div>
-      </div><!-- End Section Title -->
+    <div class="row gy-4">
 
-      <div class="container">
+      <?php 
+      $i = 1;
+      foreach ($karyawans as $chef): 
+        $foto = $chef['foto'] ?? "chefs-$i.jpg"; 
+        $nama = $chef['nama'] ?? ($chef['nama_karyawan'] ?? 'Nama Tidak Ada');
+        $jabatan = $chef['jabatan'] ?? ($chef['posisi'] ?? 'Chef');
+      ?>
 
-        <div class="row gy-5">
+      <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="<?= $i*100 ?>">
+        <div class="chef-member">
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="member">
-              <div class="pic"><img src="assets/img/chefs/member1.png" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>Walter White</h4>
-                
-                <div class="social">
-                  
-                  <a href=""><i class="bi bi-tiktok"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                  
-                </div>
-              </div>
+          <div class="member-img">
+            <img src="assets/img/chefs/<?= $foto ?>" class="img-fluid" style="height:350px; width:100%; object-fit:cover;" alt="">
+            <div class="social">
+              <a href="#"><i class="bi bi-twitter"></i></a>
+              <a href="#"><i class="bi bi-facebook"></i></a>
+              <a href="#"><i class="bi bi-instagram"></i></a>
+              <a href="#"><i class="bi bi-linkedin"></i></a>
             </div>
-          </div><!-- End Team Member -->
+          </div>
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-            <div class="member">
-              <div class="pic"><img src="assets/img/chefs/member2.png" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>Sarah Jhonson</h4>
-                
-                <div class="social">
-                  <a href=""><i class="bi bi-tiktok"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Team Member -->
+          <div class="member-info">
+            <h4><?= $nama ?></h4>
+            <span><?= ucfirst($jabatan) ?></span>
+          </div>
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="member">
-              <div class="pic"><img src="assets/img/chefs/member3.png" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>William Anderson</h4>
-                
-                <div class="social">
-                  <a href=""><i class="bi bi-tiktok"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Team Member -->
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="member">
-              <div class="pic"><img src="assets/img/chefs/member4.png" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>William Anderson</h4>
-                
-                <div class="social">
-                  <a href=""><i class="bi bi-tiktok"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Team Member -->
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="member">
-              <div class="pic"><img src="assets/img/chefs/member7.png" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>William Anderson</h4>
-                
-                <div class="social">
-                  <a href=""><i class="bi bi-tiktok"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Team Member -->
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="member">
-              <div class="pic"><img src="assets/img/chefs/member6.png" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>William Anderson</h4>
-                
-                <div class="social">
-                  <a href=""><i class="bi bi-tiktok"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Team Member -->
         </div>
-
       </div>
 
-    </section><!-- /Chefs Section -->
+      <?php 
+      $i++;
+      endforeach; 
+      ?>
+
+    </div>
+
+  </div>
+</section>
+<!-- /Chefs Section -->
 
 
     <!-- Gallery Section -->
