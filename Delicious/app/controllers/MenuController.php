@@ -1,94 +1,78 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+session_start();
+require_once __DIR__ . '/../../config/koneksi.php';
 
-require_once _DIR_ . "/../../config/koneksi.php";
-require_once _DIR_ . "/../../app/models/MenuModel.php";
+/* ================= GENERATE ID MENU MN001, MN002 ================= */
+function generateMenuId($db) {
+    $q = $db->query("SELECT id_menu FROM menu ORDER BY id_menu DESC LIMIT 1");
+    $last = $q->fetch(PDO::FETCH_ASSOC);
+    if (!$last) return "MN001";
 
-$menuModel = new MenuModel($koneksi);
-
-// Utility untuk nama file unik
-function unique_name($orig) {
-    $ext = pathinfo($orig, PATHINFO_EXTENSION);
-    return date('YmdHis') . '_' . bin2hex(random_bytes(3)) . ($ext ? '.'.$ext : '');
+    $num = intval(substr($last['id_menu'], 2)) + 1;
+    return "MN" . str_pad($num, 3, '0', STR_PAD_LEFT);
 }
 
-/* ================== CREATE ================== */
+/* ================= TAMBAH MENU ================= */
 if (isset($_POST['add_menu'])) {
-    $nama  = trim($_POST['nama_menu']);
-    $harga = (int)$_POST['harga'];
-    $stok  = (int)$_POST['stok'];
 
-    $gambar = 'noimage.png';
-    if (!empty($_FILES['gambar']['name'])) {
-        $new = unique_name($_FILES['gambar']['name']);
-        $dest = _DIR_ . "/../../assets/img/menu/" . $new;
-        @move_uploaded_file($_FILES['gambar']['tmp_name'], $dest);
-        $gambar = $new;
-    }
+    $id_menu = generateMenuId($koneksi);
+    $nama = $_POST['nama_menu'];
+    $harga = $_POST['harga'];
+    $stok  = $_POST['stok'];
 
-    try {
-        // simpan
-        $menuModel->addMenu($nama, $harga, $stok, $gambar);
+    $gambar = $_FILES['gambar']['name'];
+    $tmp = $_FILES['gambar']['tmp_name'];
+    $filename = time() . "_" . $gambar;
+    move_uploaded_file($tmp, __DIR__ . "/../../assets/img/menu/" . $filename);
 
-        // ambil id terbaru (format MNxxx) — fallback aman jika query gagal
-        $query = "SELECT id_menu FROM menu ORDER BY CAST(SUBSTRING(id_menu,3) AS UNSIGNED) DESC LIMIT 1";
-        $res = $koneksi->query($query);
-        $new_id = '';
-        if ($res && $res->num_rows) {
-            $row = $res->fetch_assoc();
-            $new_id = $row['id_menu'] ?? '';
-        }
+    $stmt = $koneksi->prepare("
+        INSERT INTO menu (id_menu, nama_menu, harga, stok, gambar)
+        VALUES (?, ?, ?, ?, ?)
+    ");
+    $stmt->execute([$id_menu, $nama, $harga, $stok, $filename]);
 
-        // redirect dengan param new_id hanya jika ada
-        $loc = "../../index.php?page=menu_admin&msg=added";
-        if (!empty($new_id)) $loc .= "&new_id=" . urlencode($new_id);
-        header("Location: " . $loc);
-    } catch (Throwable $e) {
-        error_log('Error add menu: ' . $e->getMessage());
-        header("Location: ../../index.php?page=menu_admin&msg=error");
-    }
+    header("Location: ../../index.php?page=menu_admin&msg=added&alert=add&new_id=$id_menu");
     exit;
 }
 
-/* ================== UPDATE ================== */
+/* ================= UPDATE MENU ================= */
 if (isset($_POST['update_menu'])) {
-    $id    = $_POST['id_menu'];
-    $nama  = trim($_POST['nama_menu']);
-    $harga = (int)$_POST['harga'];
-    $stok  = (int)$_POST['stok'];
 
-    try {
-        if (!empty($_FILES['gambar']['name'])) {
-            $new = unique_name($_FILES['gambar']['name']);
-            $dest = _DIR_ . "/../../assets/img/menu/" . $new;
-            @move_uploaded_file($_FILES['gambar']['tmp_name'], $dest);
-            $menuModel->updateMenu($id, $nama, $harga, $stok, $new);
-        } else {
-            $menuModel->updateMenuWithoutImage($id, $nama, $harga, $stok);
-        }
+    $id_menu = $_POST['id_menu'];
+    $nama = $_POST['nama_menu'];
+    $harga = $_POST['harga'];
+    $stok  = $_POST['stok'];
 
-        header("Location: ../../index.php?page=menu_admin&msg=updated&updated_id=" . urlencode($id));
-    } catch (Throwable $e) {
-        error_log('Error update menu: ' . $e->getMessage());
-        header("Location: ../../index.php?page=menu_admin&msg=error");
+    if (!empty($_FILES['gambar']['name'])) {
+        $gambar = $_FILES['gambar']['name'];
+        $tmp = $_FILES['gambar']['tmp_name'];
+        $filename = time() . "_" . $gambar;
+        move_uploaded_file($tmp, __DIR__ . "/../../assets/img/menu/" . $filename);
+
+        $stmt = $koneksi->prepare("
+            UPDATE menu SET nama_menu=?, harga=?, stok=?, gambar=? WHERE id_menu=?
+        ");
+        $stmt->execute([$nama, $harga, $stok, $filename, $id_menu]);
+
+    } else {
+        $stmt = $koneksi->prepare("
+            UPDATE menu SET nama_menu=?, harga=?, stok=? WHERE id_menu=?
+        ");
+        $stmt->execute([$nama, $harga, $stok, $id_menu]);
     }
+
+    header("Location: ../../index.php?page=menu_admin&msg=updated&alert=edit&updated_id=$id_menu");
     exit;
 }
 
-/* ================== DELETE ================== */
+/* ================= DELETE MENU ================= */
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
 
-    try {
-        if ($menuModel->menuUsed($id)) {
-            header("Location: ../../index.php?page=menu_admin&msg=used");
-            exit;
-        }
-        $menuModel->deleteMenu($id);
-        header("Location: ../../index.php?page=menu_admin&msg=deleted");
-    } catch (Throwable $e) {
-        header("Location: ../../index.php?page=menu_admin&msg=error");
-    }
+    $stmt = $koneksi->prepare("DELETE FROM menu WHERE id_menu=?");
+    $stmt->execute([$id]);
+
+    header("Location: ../../index.php?page=menu_admin&alert=delete&msg=deleted");
     exit;
 }
 
