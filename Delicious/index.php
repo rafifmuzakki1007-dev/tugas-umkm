@@ -12,82 +12,98 @@ require_once 'app/models/KaryawanModel.php';
 $menuModel = new MenuModel($koneksi);
 $karyawanModel = new KaryawanModel($koneksi);
 
-// pastikan selalu array (anti Warning chefs)
+// agar tidak warning
 $karyawans = $karyawanModel->getAllKaryawan() ?? [];
 
 $page = isset($_GET['page']) ? strtolower($_GET['page']) : 'home';
 
-/* ---------------- ADMIN PAGE LIST ---------------- */
-$admin_pages = ['dashboard', 'menu_admin', 'transaksi_admin', 'profile_admin'];
+/* ==================================================
+   FIX LOGOUT — versi B (aman & stabil)
+   URL: index.php?do_logout=1
+================================================== */
+if (isset($_GET['do_logout'])) {
 
-/* ---------------- LOGOUT ---------------- */
-if ($page === 'logout') {
+    // Hapus semua data sesi
     session_unset();
+
+    // Hancurkan sesi
     session_destroy();
+
+    // Hentikan cookie session agar benar-benar logout
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
+    }
+
     header("Location: index.php?page=home");
     exit;
 }
 
-/* ---------------- ADMIN ROUTING ---------------- */
-if (in_array($page, $admin_pages)){
+/* ==================================================
+   ADMIN PAGE LIST
+================================================== */
+$admin_pages = ['dashboard', 'menu_admin', 'transaksi_admin', 'profile_admin'];
 
+/* ==================================================
+   ADMIN ROUTING
+================================================== */
+if (in_array($page, $admin_pages)) {
+
+    // pastikan sudah login admin
     if (!isset($_SESSION['admin_logged_in'])) {
         header("Location: login.php");
         exit;
     }
 
-    // Lewat layout admin agar design tetap konsisten
     include "app/views/admin/layout_admin.php";
     exit;
 }
 
-/* ---------------- USER ROUTES ---------------- */
+/* ==================================================
+   USER ROUTES
+================================================== */
 
-//Halaman sukses setelah pesan
 if ($page === 'order_success') {
     include "app/views/order_success.php";
     exit;
 }
 
-//Halaman menu
 if ($page === 'menu') {
     $menus = $menuModel->getAllMenu();
     include "app/views/menu.php";
     exit;
 }
 
-//Proses pesanan
 if ($page === 'pesan_process') {
     include "app/controllers/pesan_process.php";
     exit;
 }
 
-//Cart
 if ($page === 'cart') {
     include "app/views/cart.php";
     exit;
 }
 
-//Riwayat Pesanan User
 if ($page === 'riwayat') {
     include "app/views/riwayat.php";
     exit;
 }
 
-//Login
 if ($page === 'login') {
-    if (file_exists("login.php")) {
-        include "login.php";
-    } else {
-        echo "<h3>Halaman login tidak ditemukan.</h3>";
-    }
+    include file_exists("login.php") ? "login.php" : "Halaman login tidak ditemukan.";
     exit;
 }
 
-/* 
----------------- DEFAULT → HOME ----------------
-Jika user klik "Chefs" di navbar → sebenarnya hanya scroll (#chefs)
-Jadi tetap load home.php
-*/
+/* ==================================================
+   DEFAULT HOME
+================================================== */
 $menus = $menuModel->getAllMenu();
 include "app/views/home.php";

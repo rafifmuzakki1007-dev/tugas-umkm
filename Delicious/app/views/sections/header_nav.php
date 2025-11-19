@@ -1,6 +1,6 @@
 <?php if(session_status() === PHP_SESSION_NONE) session_start(); ?>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- ❌ SWEETALERT DIHAPUS DARI SINI (SUPAYA TIDAK DOUBLE LOAD) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -27,7 +27,7 @@ $cartCount = array_sum($_SESSION['cart']);
     <div class="container d-flex align-items-center justify-content-between py-2">
 
     <img src="assets/img/logo1.png" alt="logo seblak say cafe" width="90px" height="100%">
-    
+
       <?php if(isset($_SESSION['admin'])): ?>
       <form method="GET" action="index.php" class="d-none d-md-flex align-items-center" style="width:300px;">
         <input type="hidden" name="page" value="menu_admin">
