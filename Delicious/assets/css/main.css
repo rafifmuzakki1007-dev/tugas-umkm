@@ -810,6 +810,7 @@ section,
   height: 100%;
   object-fit: cover;
   z-index: 1;
+  border-radius: 15px;
 }
 
 .hero .carousel-item {
@@ -953,6 +954,9 @@ section,
 /*--------------------------------------------------------------
 # About Section
 --------------------------------------------------------------*/
+.about{
+  padding: 0;
+}
 .about .content h3 {
   font-size: 1.75rem;
   font-weight: 700;

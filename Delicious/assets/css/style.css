@@ -1787,3 +1787,12 @@ section,
   overflow-x: clip !important;
 }
 
+.about-line {
+  width: 80px;
+  border: 2px solid #ffa837;
+}
+
+.menu-line {
+  width: 80px;
+  border: 2px solid #ffa837;
+}

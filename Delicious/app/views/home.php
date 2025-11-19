@@ -8,8 +8,8 @@
   <meta name="keywords" content="">
   
   <!-- Favicons -->
-  <link href="assets/img/logo1.png" rel="icon">
-  <link href="assets/img/logo1.png" rel="apple-touch-icon">
+  <link href="assets/img/logo-atas.jpg" rel="icon">
+  <link href="assets/img/logo-atas.jpg" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -41,11 +41,11 @@
 
   <header id="header" class="header fixed-top">
 
-    <div class="topbar d-flex align-items-center">
+    <div class="topbar d-flex align-items-center" style="min-height: 60px; padding: 5px 0;">
       <div class="container d-flex justify-content-end justify-content-md-between">
         <div class="contact-info d-flex align-items-center">
-          <img src="assets/img/logo1.png" alt="" width="100px" height="100%" id="logo-img">
-          <i class="bi bi-clock ms-4 d-none d-lg-flex align-items-center"><span>everyday: 10:00 AM - 22.00 PM</span></i>
+          <img src="assets/img/logo1.png" alt="" width="100px" id="logo-img">
+          <i class="bi bi-clock ms-4 d-none d-lg-flex align-items-center"> <span>everyday: 10:00 AM - 22.00 PM</span></i>
     </div>
 
         <nav id="navmenu" class="navmenu">
@@ -53,11 +53,19 @@
             <li><a href="#hero" class="active">Home</a></li>
             <li><a href="#about">Tentang</a></li>
             <li><a href="#menu">Menu</a></li>
-            <li><a href="#chefs">Member</a></li>
-            <li><a href="#testimonials">Testimoni</a></li>
+            <li><a href="#testimonials">Ulasan</a></li>
             <li><a href="#contact">Lokasi</a></li>
             
-        <a href="index.php?page=menu" class="cta-btn" id="order-btn">Order Online</a>
+        <a href="index.php?page=menu" 
+        style="color: var(--contrast-color);
+         background: var(--accent-color);
+         font-weight: 500;
+         font-size: 14px;
+         letter-spacing: 1px;
+         display: inline-block;
+         padding: 6px 30px 8px 30px;
+         border-radius: 50px;
+         transition: 0.3s;">Order Online</a>
       
           </ul>
           <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -85,131 +93,66 @@
 
     </section><!-- /Hero Section -->
 
+    <section class="section light-background"> </section>
+
     <!-- About Section -->
-    <section id="about" class="about section light-background">
+    <section id="about" class="about section light-background">  
 
       <div class="container">
 
         <div class="row gy-4">
           <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="100">
-            <img src="assets/img/about.jpg" class="img-fluid" alt="">
-            <!-- <a href="https://www.tiktok.com/@seblakprasmanansaycafe/video/7404134925936381190?is_from_webapp=1&sender_device=pc" class="glightbox pulsating-play-btn"></a> -->
+            <img src="assets/img/about.jpg"  class="img-fluid rounded-5" alt="" style="border: 4px solid #333; border-radius: 12px;">
           </div>
-          <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="200">
-            <h3>About Us <span class="description-title">Seblak</span> Say Cafe.</h3>
-            <p class="fst-italic">
-              Berdiri pada tahun 2022, Seblak Say Cafe menjadi salah satu tempat nyeblak paling digemari di warujayeng
-              . Alasan mengapa seblak ini digemari :
+          <div class="col-lg-6 content align-self-center text-center" data-aos="fade-up" data-aos-delay="200">
+            <h3 class="fs-2">
+              About Us <span class="description-title">Seblak</span> Say Cafe.
+            </h3>
+            <p class="fst-italic fs-6">
+              UMKM Seblak Say Cafe merupakan usaha makanan yang menawarkan seblak sebagai produk utama.
+               Usaha ini memanfaatkan tingginya minat masyarakat terhadap jajanan pedas dan berharga terjangkau.
             </p>
-            <ul>
-              <li><i class="bi bi-check2-all"></i> <span>Suasana yang Nyaman,Tenang dan Santai</span></li>
-              <li><i class="bi bi-check2-all"></i> <span>Rasa Seblak Gurih</span></li>
-              <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate trideta storacalaperda mastiro dolore eu fugiat nulla pariatur.</span></li>
-            </ul>
-            <p>
-              Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-              velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident
-            </p>
+            
+            <hr class="about-lin">
+
+            <a href="#" class="btn mt-3 px-4 py-2" 
+             style="background:#FEB64A; color:white; border:none;">Learn More</a>
+
           </div>
         </div>
 
       </div>
 
     </section><!-- /About Section -->
-
-    <section id="menu" class="menu section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <!-- <h2>Menu</h2> -->
-        <div><span>Varian</span> <span class="description-title">Menu</span> <span>Kami</span></div>
-      </div><!-- End Section Title -->
-
-      <div class="menu-card-wrapper">
-<?php foreach ($menus as $menu):
-  $stok = $menu['stok'];?>
-<div class="menu-card <?= $sold?'sold-out':'' ?>">
-  <div style="position:relative;">
-    <img src="assets/img/menu/<?= $menu['gambar']; ?>">
     
-  </div>
-  <h5><?= $menu['nama_menu']; ?></h5>
-</div>
-<?php endforeach; ?>
-</div>
+    <section id="menu" class="about section light-background">
+      <div class="container">
+
+        <div class="row gy-4">
+          <div class="col-lg-6 content align-self-center text-center" data-aos="fade-up" data-aos-delay="200">
+            <h3 class="fs-2">
+              Our Favorite <span class="description-title">Menus</span>
+            </h3>
+            <p class="fst-italic fs-6">
+              Seblak spesial kami hadir dengan berbagai tingkat kepedasan dan topping yang bisa kamu pilih sesuka hati.
+               Dari yang creamy, gurih, hingga super pedas—semua tersedia untuk memanjakan lidahmu.
+            </p>
+
+            <hr class="menu-lin">
+
+            <a href="index.php?page=menu" class="btn mt-3 px-4 py-2" 
+             style="background:#FEB64A; color:white; border:none;">Menu</a>
+             
+          </div>
+          <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="100">
+            <img src="assets/img/seblak.jpg" class="img-fluid rounded-5" alt="" width="90%;" style="border: 4px solid #333; border-radius: 12px; ">
+          </div>
+        </div>
       
     </section>
+
+    <section class=" section light-background"></section>
     
-
-<!-- Chefs Section -->
-<?php 
-// Fallback jika DB kosong
-$karyawans = $karyawans ?? [];
-
-if (count($karyawans) == 0) {
-  $karyawans = [
-    ["foto" => "foto-1.png", "nama" => "Walter White", "jabatan" => ""],
-    ["foto" => "foto-2.png", "nama" => "Sarah Jhonson", "jabatan" => ""],
-    ["foto" => "foto-3.png", "nama" => "William Anderson", "jabatan" => ""],
-    ["foto" => "foto-4.png", "nama" => "William Anderson", "jabatan" => ""],
-    ["foto" => "foto-5.png", "nama" => "William Anderson", "jabatan" => ""],
-    ["foto" => "foto-6.png", "nama" => "William Anderson", "jabatan" => ""],
-    ["foto" => "foto-7.png", "nama" => "William Anderson", "jabatan" => ""],
-  ];
-}
-?>
-
-<section id="chefs" class="chefs section-bg">
-  <div class="container">
-
-    <!-- Title sesuai template -->
-    <div class="section-header text-center mb-5" data-aos="fade-up">
-      <span class="subtitle-chef">CHEFS</span>
-      <h2 class="chef-title">Our <span>Professional</span> Chefs</h2>
-    </div>
-
-    <div class="row gy-4">
-
-      <?php 
-      $i = 1;
-      foreach ($karyawans as $chef): 
-        $foto = $chef['foto'] ?? "chefs-$i.jpg"; 
-        $nama = $chef['nama'] ?? ($chef['nama_karyawan'] ?? 'Nama Tidak Ada');
-        $jabatan = $chef['jabatan'] ?? ($chef['posisi'] ?? 'Chef');
-      ?>
-
-      <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="<?= $i*100 ?>">
-        <div class="chef-member">
-
-          <div class="member-img">
-            <img src="assets/img/chefs/<?= $foto ?>" class="img-fluid" style="height:350px; width:100%; object-fit:cover;" alt="">
-            <div class="social">
-              <a href="#"><i class="bi bi-twitter"></i></a>
-              <a href="#"><i class="bi bi-facebook"></i></a>
-              <a href="#"><i class="bi bi-instagram"></i></a>
-              <a href="#"><i class="bi bi-linkedin"></i></a>
-            </div>
-          </div>
-
-          <div class="member-info">
-            <h4><?= $nama ?></h4>
-            <span><?= ucfirst($jabatan) ?></span>
-          </div>
-
-        </div>
-      </div>
-
-      <?php 
-      $i++;
-      endforeach; 
-      ?>
-
-    </div>
-
-  </div>
-</section>
-
-
     <!-- Testimonials Section -->
      
     <section id="testimonials" class="testimonials section dark-background">
@@ -322,91 +265,22 @@ if (count($karyawans) == 0) {
 
       </div>
 
-    </section><!-- /Testimonials Section -->
+    </section><!-- /Testimonials Section -->  
 
     <!-- Contact Section -->
-    <section id="contact" class="contact section">
-
+    <section id="contact" style="padding:80px 0;" class="about section light-background py-6">
       <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
+      <div class="container section-title" style="padding: 10px;" data-aos="fade-up">
         <!-- <h2>Contact</h2> -->
         <div><span>Kunjungi </span><span class="description-title">Seblak Say Cafe</div>
       </div><!-- End Section Title -->
 
       <div class="mb-5">
-       <iframe style="width: 100%; height: 400px;" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.318951464519!2d112.01129887481696!3d-7.648810892367321!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e784f0048ac8ce5%3A0x99f1db18d32fb436!2sSeblak%20SAY%20Cafe!5e0!3m2!1sid!2sid!4v1762855183435!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <center>
+          <iframe style="width: 80%; height: 550px;" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.318951464519!2d112.01129887481696!3d-7.648810892367321!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e784f0048ac8ce5%3A0x99f1db18d32fb436!2sSeblak%20SAY%20Cafe!5e0!3m2!1sid!2sid!4v1762855183435!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </center>
       </div><!-- End Google Maps -->
-
-      <div class="container" data-aos="fade">
-
-        <div class="row gy-5 gx-lg-5">
-
-          <div class="col-lg-4">
-
-            <div class="info">
-              <h3>Get in touch</h3>
-              <p>Et id eius voluptates atque nihil voluptatem enim in tempore minima sit ad mollitia commodi minus.</p>
-
-              <div class="info-item d-flex">
-                <i class="bi bi-geo-alt flex-shrink-0"></i>
-                <div>
-                  <h4>Location:</h4>
-                  <p>Jl. Warujayeng - Kediri, RT.02/RW.06, Krajan Selatan, Kampungbaru, Kec. Tanjunganom, Kabupaten Nganjuk, Jawa Timur 64482
-27 mnt</p>
-                </div>
-              </div><!-- End Info Item -->
-
-              <div class="info-item d-flex">
-                <i class="bi bi-envelope flex-shrink-0"></i>
-                <div>
-                  <h4>Email:</h4>
-                  <p>info@example.com</p>
-                </div>
-              </div><!-- End Info Item -->
-
-              <div class="info-item d-flex">
-                <i class="bi bi-phone flex-shrink-0"></i>
-                <div>
-                  <h4>Call:</h4>
-                  <p>+1 5589 55488 55</p>
-                </div>
-              </div><!-- End Info Item -->
-
-            </div>
-
-          </div>
-
-          <div class="col-lg-8">
-            <form action="forms/contact.php" method="post" role="form" class="php-email-form">
-              <div class="row">
-                <div class="col-md-6 form-group">
-                  <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required="">
-                </div>
-                <div class="col-md-6 form-group mt-3 mt-md-0">
-                  <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" required="">
-                </div>
-              </div>
-              <div class="form-group mt-3">
-                <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" required="">
-              </div>
-              <div class="form-group mt-3">
-                <textarea class="form-control" name="message" placeholder="Message" required=""></textarea>
-              </div>
-              <div class="my-3">
-                <div class="loading">Loading</div>
-                <div class="error-message"></div>
-                <div class="sent-message">Your message has been sent. Thank you!</div>
-              </div>
-              <div class="text-center"><button type="submit">Send Message</button></div>
-            </form>
-          </div><!-- End Contact Form -->
-
-        </div>
-
-      </div>
-
-    </section><!-- /Contact Section -->
-
+      </section><!-- /Contact Section --> 
 
 
     <footer id="footer" class="footer dark-background">
