@@ -1,4 +1,4 @@
-<?php  
+<?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: ../../login.php");
@@ -13,312 +13,436 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <style>
-/* ================= PAGE WRAPPER (sama persis dengan Kelola Transaksi) ================ */
-.page-wrapper {
-    margin-top: 30px;
-    padding-bottom: 40px;
+
+/* ============================================================
+   BASE PAGE LAYOUT
+============================================================ */
+.page-wrapper { 
+    margin-top: 30px; 
+    padding-bottom: 40px; 
+}
+.card { border-radius: 14px; }
+.card-header { padding: 18px 24px; }
+
+
+/* ============================================================
+   CRUD TABLE — PREMIUM CLEAN DASHBOARD STYLE
+============================================================ */
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
 }
 
-/* ================= CARD & TABLE ================= */
-.card {
-    border-radius: 14px;
-}
-.card-header {
-    padding: 18px 24px;
-}
-.table td, .table th {
-    vertical-align: middle !important;
-}
-#menuTable img {
-    border-radius: 8px;
-    object-fit: cover;
+.table thead th {
+    background: #f8f9fc !important;
+    color: black;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 18px;
+    border: none !important;
 }
 
-/* ================= ALERT ================= */
-.alert-custom {
-    display:flex;
-    align-items:center;
-    gap:12px;
-    border-radius:8px;
-    padding:16px 20px;
-    font-size:16px;
-}
-
-/* ================= BADGES & HIGHLIGHT ================= */
-.badge-new { background:#0d6efd; color:#fff; padding:4px 8px; border-radius:6px; }
-.badge-updated { background:#ffc107; color:#222; padding:4px 8px; border-radius:6px; }
-
-.highlight-flash { animation: flashRow 1.2s ease-in-out 2; }
-@keyframes flashRow {
-    0% {background:transparent} 
-    50% {background:rgba(13,110,253,.18)} 
-    100% {background:transparent}
-}
-
-/* ================= MODAL RAPI PROFESSIONAL ================= */
-.modal .modal-dialog {
-    max-width: 760px;
-}
-.modal .modal-content {
+#menuTable tbody tr {
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.07);
     border-radius: 12px;
 }
-.modal .modal-header {
-    padding: 18px 28px;
-    border-bottom: none;
-}
-.modal .modal-title {
-    font-weight: 500;
+
+#menuTable tbody tr td {
+    padding: 16px 18px;
     font-size: 14px;
-}
-.modal .modal-body {
-    padding: 22px 28px;
-}
-.modal .modal-footer {
-    padding: 16px 28px;
-    border-top: none;
-}
-.modal .form-label {
-    font-weight: 500;
-    margin-bottom: 6px;
+    vertical-align: middle !important;
+    border: none !important;
 }
 
-.animated-alert {
-    animation: scaleIn .35s ease-out;
+/* Gambar menu seragam */
+#menuTable img {
+    width: 70px;
+    height: 55px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e6e6e6;
 }
 
-@keyframes scaleIn {
-    from {
-        transform: scale(0.7);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
+/* ID badge */
+#menuTable .badge {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* Nama menu lebih tegas */
+#menuTable td:nth-child(3) {
+    font-weight: 600;
+    color: #2a2f3c;
+}
+
+/* Harga */
+#menuTable td:nth-child(4) {
+    font-weight: 700;
+    color: black;
+}
+
+/* Stok */
+#menuTable td:nth-child(5) {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Aksi Buttons */
+#menuTable .btn {
+    padding: 5px 10px;
+  /*  border-radius: ; */
+    font-size: 13px;
+}
+
+/* Hover row efek */
+#menuTable tbody tr:hover {
+    transform: translateY(-2px);
+    transition: 0.15s ease;
+    box-shadow: 0 5px 16px rgba(0,0,0,0.12);
+}
+
+/* ============================================================
+   BADGES: Baru & Diedit
+============================================================ */
+.badge-new {
+    background: #0d6efd;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge-updated {
+    background: #ff9f43;
+    color: #fff !important;   /* ← FIX WARNA PUTIH */
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.highlight-flash {
+    animation: flashRow 1.2s ease-in-out 2;
+}
+
+@keyframes flashRow {
+    0% { background: transparent; }
+    50% { background: rgba(13,110,253,0.12); }
+    100% { background: transparent; }
 }
 
 
-/* ================= AUTO HIDE ALERT ================= */
-.fade-out { transition: opacity .6s ease; opacity:0; }
+/* ============================================================
+   MODAL STYLE (dirapikan agar senada tabel)
+============================================================ */
 
-/* Buttons clickable above highlight */
-.editBtn, .deleteBtn { position: relative; z-index:20; cursor:pointer; }
+.modal .modal-dialog { max-width: 760px; }
+.modal .modal-content { border-radius: 14px; }
+.modal .modal-header { 
+    padding: 18px 28px; 
+    border-bottom: none; 
+}
+.modal .modal-title { 
+    font-weight: 700; 
+    font-size: 16px; 
+}
+.modal .modal-body { padding: 22px 28px; }
+.modal .modal-footer { 
+    border-top: none; 
+    padding: 16px 28px; 
+}
+
+/* bulk preview img */
+#bulkTable .preview-img {
+    width:56px;
+    height:56px;
+    border-radius:8px;
+    object-fit:cover;
+    display:none;
+}
+
+/* left icon tweak */
+.modal-header .bi-collection { 
+    transform: translateY(-1px); 
+}
+
+
+/* Popup SweetAlert smooth */
+.swal2-popup { animation: swal2-show .24s ease-out; }
+@keyframes swal2-show {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
 </style>
 
-
 <div class="page-wrapper">
-<div class="container">
+  <div class="container">
 
-<!-- ===================== ALERT ===================== -->
-<?php if (isset($_GET['alert'])): ?>
-<script>
-Swal.fire({
-    icon: "success",
-    title: "<?= $_GET['alert'] === 'add' ? 'Menu Ditambahkan!' : 'Menu Diperbarui!' ?>",
-    text: "<?= $_GET['alert'] === 'add' ? 'Menu baru berhasil disimpan.' : 'Perubahan berhasil disimpan.' ?>",
-    showConfirmButton: false,
-    timer: 1500,
-    timerProgressBar: true,
-    position: "center",
-    background: "#ffffff",
-    iconColor: "#198754",
-    customClass: { popup: "animated-alert" }
-});
+    <h2 class="fw-bold mb-4">
+      <i class="bi bi-grid me-2"></i> Kelola Menu
+    </h2>
 
-setTimeout(() => {
-    history.replaceState(null, "", location.pathname + "?page=menu_admin");
-}, 1600);
-</script>
-<?php endif; ?>
-
-
-<!-- ===================== TITLE (dengan ICON seperti Kelola Transaksi) ====================== -->
-<h2 class="fw-bold mb-4">
-    <i class="bi bi-grid me-2"></i> Kelola Menu
-</h2>
-
-
-<!-- ===================== CARD MENU ====================== -->
-<div class="card shadow-sm border-0 mb-4">
-
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 class="m-0">Daftar Menu</h5>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">
-            <i class="bi bi-plus-circle me-1"></i> Tambah Menu
-        </button>
-    </div>
+        <div>
+          <!-- Tambah Banyak jadi biru (btn-primary). Tambah Menu dihapus dari header -->
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBulk">
+            <i class="bi bi-collection me-1"></i> Tambah Menu
+          </button>
+        </div>
+      </div>
 
-    <div class="card-body">
+      <div class="card-body">
         <table class="table table-hover align-middle" id="menuTable">
-            <thead class="table-light">
-                <tr>
-                    <th style="width:8%">ID</th>
-                    <th style="width:12%">Gambar</th>
-                    <th>Nama Menu</th>
-                    <th style="width:14%">Harga</th>
-                    <th style="width:8%">Stok</th>
-                    <th style="width:14%">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-
+          <thead class="table-light">
+            <tr>
+              <th style="width:8%">ID Menu</th>
+              <th style="width:12%">Gambar</th>
+              <th>Nama Menu</th>
+              <th style="width:14%">Harga</th>
+              <th style="width:8%">Stok</th>
+              <th style="width:14%">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
             <?php foreach($menus as $row): ?>
-            <tr data-id="<?= $row['id_menu'] ?>">
-                <td><span class="badge bg-secondary"><?= $row['id_menu'] ?></span></td>
+            <tr data-id="<?= htmlspecialchars($row['id_menu']); ?>">
+              <td><span class="badge bg-secondary"><?= htmlspecialchars($row['id_menu']); ?></span></td>
+              <td><img src="assets/img/menu/<?= htmlspecialchars($row['gambar']); ?>" width="64" height="64"></td>
+              <td><?= htmlspecialchars($row['nama_menu']); ?> <span class="row-badge-placeholder"></span></td>
+              <td>Rp <?= number_format($row['harga'], 0, ',', '.'); ?></td>
+              <td><?= htmlspecialchars($row['stok']); ?></td>
+              <td>
+                <button type="button" class="btn btn-warning btn-sm editBtn"
+                  data-id="<?= htmlspecialchars($row['id_menu']); ?>"
+                  data-nama="<?= htmlspecialchars($row['nama_menu'], ENT_QUOTES); ?>"
+                  data-harga="<?= htmlspecialchars($row['harga']); ?>"
+                  data-stok="<?= htmlspecialchars($row['stok']); ?>">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
 
-                <td><img src="assets/img/menu/<?= htmlspecialchars($row['gambar']); ?>" width="64" height="64"></td>
-
-                <td>
-                    <?= htmlspecialchars($row['nama_menu']); ?>
-                    <span class="row-badge-placeholder"></span>
-                </td>
-
-                <td>Rp <?= number_format($row['harga'],0,',','.') ?></td>
-
-                <td><?= $row['stok'] ?></td>
-
-                <td>
-                    <button class="btn btn-warning btn-sm editBtn"
-                        data-id="<?= $row['id_menu'] ?>"
-                        data-nama="<?= htmlspecialchars($row['nama_menu'], ENT_QUOTES) ?>"
-                        data-harga="<?= $row['harga'] ?>"
-                        data-stok="<?= $row['stok'] ?>">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-
-                    <button class="btn btn-danger btn-sm deleteBtn" data-id="<?= $row['id_menu'] ?>">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
+                <button type="button" class="btn btn-danger btn-sm deleteBtn" data-id="<?= htmlspecialchars($row['id_menu']); ?>">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
             </tr>
             <?php endforeach; ?>
-
-            </tbody>
+          </tbody>
         </table>
+      </div>
     </div>
+  </div>
 </div>
 
-</div>
-</div>
-
-
-<!-- ===================== MODAL TAMBAH ===================== -->
+<!-- MODAL TAMBAH (tetap ada, tidak dihapus; bisa digunakan jika butuh) -->
 <div class="modal fade" id="modalTambah" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered modal-lg">
-<div class="modal-content">
-
-<form action="app/controllers/MenuController.php" method="POST" enctype="multipart/form-data">
-
-    <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i> Tambah Menu</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-    </div>
-
-    <div class="modal-body">
-        <div class="row g-4">
-            <div class="col-md-6">
-                <label class="form-label">Nama Menu</label>
-                <input type="text" class="form-control" name="nama_menu" required>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Harga</label>
-                <input type="number" class="form-control" name="harga" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Stok</label>
-                <input type="number" class="form-control" name="stok" required>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Gambar</label>
-                <input type="file" class="form-control" name="gambar" required>
-            </div>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <form action="app/controllers/MenuController.php" method="POST" enctype="multipart/form-data">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i> Tambah Menu</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
+
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <label class="form-label">Nama Menu</label>
+              <input type="text" class="form-control" name="nama_menu" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Harga</label>
+              <input type="number" class="form-control" name="harga" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Stok</label>
+              <input type="number" class="form-control" name="stok" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Gambar</label>
+              <input type="file" class="form-control" name="gambar" required accept="image/*">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" name="add_menu" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
     </div>
-
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="submit" name="add_menu" class="btn btn-primary">Simpan</button>
-    </div>
-
-</form>
-
-</div>
-</div>
+  </div>
 </div>
 
-
-<!-- ===================== MODAL EDIT ===================== -->
+<!-- MODAL EDIT -->
 <div class="modal fade" id="modalEdit" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered modal-lg">
-<div class="modal-content">
-
-<form action="app/controllers/MenuController.php" method="POST" enctype="multipart/form-data">
-
-    <div class="modal-header bg-warning">
-        <h5 class="modal-title text-dark"><i class="bi bi-pencil-square me-2"></i> Edit Menu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-    </div>
-
-    <div class="modal-body">
-        <input type="hidden" id="edit_id" name="id_menu">
-
-        <div class="row g-4">
-            <div class="col-md-6">
-                <label class="form-label">Nama Menu</label>
-                <input type="text" id="edit_nama" name="nama_menu" class="form-control" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Harga</label>
-                <input type="number" id="edit_harga" name="harga" class="form-control" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Stok</label>
-                <input type="number" id="edit_stok" name="stok" class="form-control" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Ganti Gambar (Opsional)</label>
-                <input type="file" name="gambar" class="form-control">
-            </div>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <form action="app/controllers/MenuController.php" method="POST" enctype="multipart/form-data">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title text-dark"><i class="bi bi-pencil-square me-2"></i> Edit Menu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="edit_id" name="id_menu">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <label class="form-label">Nama Menu</label>
+              <input type="text" id="edit_nama" name="nama_menu" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Harga</label>
+              <input type="number" id="edit_harga" name="harga" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Stok</label>
+              <input type="number" id="edit_stok" name="stok" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Ganti Gambar (Opsional)</label>
+              <input type="file" name="gambar" class="form-control" accept="image/*">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" name="update_menu" class="btn btn-warning">Update</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
 
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="submit" name="update_menu" class="btn btn-warning">Update</button>
+<!-- MODAL BULK -->
+<div class="modal fade" id="modalBulk" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <form action="app/controllers/MenuController.php" method="POST" enctype="multipart/form-data">
+
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="bi bi-collection me-2"></i> Tambah Banyak Menu</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle" id="bulkTable">
+              <thead class="table-light">
+                <tr>
+                  <th style="width:30%">Nama Menu</th>
+                  <th style="width:15%">Harga</th>
+                  <th style="width:15%">Stok</th>
+                  <th style="width:25%">Gambar</th>
+                  <th style="width:15%">Aksi</th>
+                </tr>
+              </thead>
+
+              <tbody id="bulkBody">
+                <tr>
+                  <td><input type="text" name="nama_menu[]" class="form-control" required></td>
+                  <td><input type="number" name="harga[]" class="form-control" required min="0"></td>
+                  <td><input type="number" name="stok[]" class="form-control" required min="0"></td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="file" name="gambar[]" class="form-control imgInput" accept="image/*" required>
+                      <img src="" class="preview-img">
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <div class="d-flex gap-1 justify-content-center">
+                      <button type="button" class="btn btn-info btn-sm cloneRow"><i class="bi bi-files"></i></button>
+                      <button type="button" class="btn btn-danger btn-sm removeRow"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+
+            </table>
+          </div>
+
+          <button type="button" id="addRow" class="btn btn-outline-primary mt-1">
+            <i class="bi bi-plus-lg"></i> Tambah Baris
+          </button>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" name="add_menu_bulk" class="btn btn-primary">Simpan Semua</button>
+        </div>
+
+      </form>
     </div>
-
-</form>
-
-</div>
-</div>
+  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- ===================== JAVASCRIPT ===================== -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
+  // Hilangkan aria-hidden yg membuat tombol tidak bisa diklik
+  document.querySelectorAll("[aria-hidden='true']").forEach(el => {
+      el.removeAttribute("aria-hidden");
+  });
+
+    /* ============================================================
+       FIX: Tambah fungsi cleanup agar tidak error
+    ============================================================ */
+    function cleanupBootstrapModalArtifacts() {
+        document.body.classList.remove("modal-open");
+        document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+    }
+
+    function cleanupSweetAlertArtifacts() {
+        document.querySelectorAll('.swal2-container').forEach(el => el.remove());
+        document.querySelectorAll('.swal2-backdrop').forEach(el => el.remove());
+        document.body.classList.remove("swal2-shown", "swal2-height-auto");
+        document.body.style.overflow = "auto";
+    }
+
+    /* SAFE INIT */
+    cleanupBootstrapModalArtifacts();
+    cleanupSweetAlertArtifacts();
+
     const tbody = document.querySelector("#menuTable tbody");
 
-    /* ===================== EDIT ===================== */
+    /* ============================================================
+       EDIT BUTTON — ADDED HANDLER (fix tombol edit tidak bisa diklik)
+       - Bersihkan overlay / aria-hidden sebelum membuka modal
+       - Isi form lalu show modal menggunakan Bootstrap's API
+    ============================================================ */
     tbody.addEventListener("click", (e) => {
-        const btn = e.target.closest(".editBtn");
-        if (!btn) return;
+        const edit = e.target.closest(".editBtn");
+        if (edit) {
+            // cleanup any leftover overlays or aria-hidden attributes
+            cleanupSweetAlertArtifacts();
+            cleanupBootstrapModalArtifacts();
+            document.querySelectorAll("[aria-hidden]").forEach(el => el.removeAttribute("aria-hidden"));
+            document.querySelectorAll(".page-fade").forEach(el => el.classList.remove("page-fade"));
+            document.body.style.pointerEvents = "auto";
 
-        document.getElementById("edit_id").value = btn.dataset.id;
-        document.getElementById("edit_nama").value = btn.dataset.nama;
-        document.getElementById("edit_harga").value = btn.dataset.harga;
-        document.getElementById("edit_stok").value = btn.dataset.stok;
+            // fill form
+            document.getElementById("edit_id").value = edit.dataset.id;
+            document.getElementById("edit_nama").value = edit.dataset.nama;
+            document.getElementById("edit_harga").value = edit.dataset.harga;
+            document.getElementById("edit_stok").value = edit.dataset.stok;
 
-        new bootstrap.Modal(document.getElementById('modalEdit')).show();
-    });
+            // show modal (Bootstrap)
+            const modalEl = document.getElementById('modalEdit');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
 
-    /* ===================== DELETE (SweetAlert Confirm) ===================== */
-    tbody.addEventListener("click", (e) => {
+            return; // stop here so delete handler won't run for same click
+        }
+
         const btn = e.target.closest(".deleteBtn");
         if (!btn) return;
 
@@ -327,108 +451,120 @@ document.addEventListener("DOMContentLoaded", () => {
             text: "Data tidak dapat dikembalikan!",
             icon: "warning",
             showCancelButton: true,
+            confirmButtonText: "Hapus",
+            cancelButtonText: "Batal",
             confirmButtonColor: "#d33",
             cancelButtonColor: "#6c757d",
-            confirmButtonText: "Hapus"
-        }).then(res => {
+            allowOutsideClick: false
+        }).then((res) => {
+            cleanupBootstrapModalArtifacts();
+            cleanupSweetAlertArtifacts();
+
             if (res.isConfirmed) {
-                window.location.href = 
-                    "app/controllers/MenuController.php?delete=" + encodeURIComponent(btn.dataset.id);
+                window.location.href =
+                  "app/controllers/MenuController.php?delete=" +
+                  encodeURIComponent(btn.dataset.id);
             }
         });
     });
 
-    /* ===================== HIGHLIGHT BARU & EDIT ===================== */
-    (function highlight() {
-        const params = new URLSearchParams(window.location.search);
-        const msg = params.get("msg");
-        const newId = params.get("new_id");
-        const updId = params.get("updated_id");
 
-        function addBadge(tr, type) {
-            const ph = tr.querySelector(".row-badge-placeholder");
-            ph.innerHTML = `<span class="${type === 'new' ? 'badge-new' : 'badge-updated'}">
-                                ${type === 'new' ? 'Baru' : 'Diedit'}
-                            </span>`;
-            tr.classList.add("highlight-flash");
-        }
-
-        function moveTop(tr) {
-            tbody.insertBefore(tr, tbody.firstElementChild);
-            tr.scrollIntoView({ behavior:'smooth', block:'center' });
-        }
-
-        if (msg === "added" && newId) {
-            let tr = document.querySelector(`tr[data-id="${newId}"]`);
-            if (tr) { addBadge(tr, "new"); moveTop(tr); }
-        }
-
-        if (msg === "updated" && updId) {
-            let tr = document.querySelector(`tr[data-id="${updId}"]`);
-            if (tr) { addBadge(tr, "updated"); moveTop(tr); }
-        }
-
-        // Clean URL
-        if (msg || params.get("alert")) {
-            history.replaceState(null, "", location.pathname + "?page=menu_admin");
-        }
-    })();
-
-    /* ===================== ALERT AUTO HIDE ===================== */
-    const alertBox = document.getElementById("pageAlert");
-    if (alertBox) {
-        const closeBtn = document.getElementById("closeAlertBtn");
-        if (closeBtn) closeBtn.addEventListener("click", () => alertBox.remove());
-
-        setTimeout(() => {
-            alertBox.classList.add("fade-out");
-            setTimeout(() => alertBox.remove(), 700);
-        }, 3500);
-    }
-
-});
-
-// ================ SUCCESS POPUP (AUTO CLOSE) =================
-(function showSuccessPopup() {
+    /* ============================================================
+       MOVE NEW / UPDATED ROW TO TOP
+    ============================================================ */
     const params = new URLSearchParams(window.location.search);
-    const alert = params.get("alert");
+    const msg = params.get("msg");
+    const newId = params.get("new_id");
+    const updId = params.get("updated_id");
+    const newIdsParam = params.get("new_ids");
 
-    if (!alert) return;
+    function moveRowToTop(id, isUpdated = false) {
+        const tr = document.querySelector(`tr[data-id="${id}"]`);
+        if (!tr) return;
 
-    let title = "";
-    let text = "";
+        const badge = tr.querySelector(".row-badge-placeholder");
+        badge.innerHTML = isUpdated
+            ? '<span class="badge-updated">Diedit</span>'
+            : '<span class="badge-new">Baru</span>';
 
-    if (alert === "add") {
-        title = "Menu Ditambahkan!";
-        text  = "Menu baru berhasil disimpan.";
+        tr.classList.add("highlight-flash");
+        tbody.prepend(tr);
     }
-    if (alert === "edit") {
-        title = "Menu Diperbarui!";
-        text  = "Perubahan berhasil disimpan.";
-    }
 
-    if (alert === "add" || alert === "edit") {
+    if (msg === "added" && newId) moveRowToTop(newId);
+    if (msg === "added" && newIdsParam) {
+        newIdsParam.split(",").forEach(id => moveRowToTop(id));
+    }
+    if (msg === "updated" && updId) moveRowToTop(updId, true);
+
+
+    /* ============================================================
+       AUTO CLOSE SUCCESS ALERT
+    ============================================================ */
+    const alertType = params.get("alert");
+
+    if (alertType) {
+
+        let title = "", text = "";
+
+        if (alertType === "add") {
+            title = "Menu Ditambahkan!";
+            text = "Menu baru berhasil ditambahkan.";
+        } else if (alertType === "edit") {
+            title = "Menu Diperbarui!";
+            text = "Perubahan berhasil disimpan.";
+        } else if (alertType === "delete") {
+            title = "Menu Dihapus!";
+            text = "Penghapusan berhasil.";
+        }
+
         Swal.fire({
             icon: "success",
-            title: title,
-            text: text,
-            showConfirmButton: false,
-            timer: 1600,
-            timerProgressBar: true,
-            position: "center",
-            background: "#ffffff",
-            iconColor: "#198754",
-            customClass: {
-                popup: "animated-alert"
-            }
-        });
-
-        // Hapus parameter alert dari URL setelah popup hilang
-        setTimeout(() => {
+            title,
+            text,
+            timer: 1500,
+            showConfirmButton: false
+        }).then(() => {
+            cleanupSweetAlertArtifacts();
             history.replaceState(null, "", location.pathname + "?page=menu_admin");
-        }, 1700);
+        });
     }
-})();
 
 
+    /* ============================================================
+       BULK ADD
+    ============================================================ */
+    const bulkBody = document.getElementById("bulkBody");
+    const addRowBtn = document.getElementById("addRow");
+
+    addRowBtn.addEventListener("click", () => {
+        const row = bulkBody.firstElementChild.cloneNode(true);
+        row.querySelectorAll("input").forEach(inp => inp.value = "");
+        row.querySelector(".preview-img").style.display = "none";
+        bulkBody.appendChild(row);
+    });
+
+    bulkBody.addEventListener("click", (e) => {
+        if (e.target.closest(".removeRow")) {
+            if (bulkBody.children.length > 1) e.target.closest("tr").remove();
+        }
+
+        if (e.target.closest(".cloneRow")) {
+            const tr = e.target.closest("tr");
+            const clone = tr.cloneNode(true);
+            clone.querySelectorAll("input").forEach(inp => inp.value = "");
+            clone.querySelector(".preview-img").style.display = "none";
+            bulkBody.appendChild(clone);
+        }
+    });
+
+    bulkBody.addEventListener("change", (e) => {
+        if (!e.target.classList.contains("imgInput")) return;
+        const img = e.target.closest("td").querySelector(".preview-img");
+        const file = e.target.files[0];
+        img.src = file ? URL.createObjectURL(file) : "";
+        img.style.display = file ? "block" : "none";
+    });
+
+});
 </script>

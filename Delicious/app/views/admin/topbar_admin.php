@@ -1,159 +1,197 @@
-<?php
-// ------- Fallback data -------
+<?php 
 $lowStockCount = isset($lowStockCount) ? (int)$lowStockCount : 0;
 $lowStockMenus = isset($lowStockMenus) && is_array($lowStockMenus) ? $lowStockMenus : [];
 $user = $_SESSION['user'] ?? [];
 
-// Nama asli dari session
+// Nama user
 $rawName = $user['username'] ?? $user['nama'] ?? 'Admin';
-
-// Jika email, tampilkan sebelum "@"
-if (strpos($rawName, '@') !== false) {
-    $displayName = explode('@', $rawName)[0];
-} else {
-    $displayName = $rawName;
-}
-
-// Short name utk UI (antisipasi panjang)
+$displayName = (strpos($rawName, '@') !== false) ? explode('@', $rawName)[0] : $rawName;
 $shortName = strlen($displayName) > 14 ? substr($displayName, 0, 12) . "…" : $displayName;
 
 // Avatar
 $avatar = !empty($user['foto'])
-    ? 'uploads/admin/' . $user['foto']
-    : 'https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=' . urlencode($displayName);
+    ? "app/views/uploads/admin/" . $user['foto']
+    : "https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=" . urlencode($displayName);
 ?>
 
-<div class="topbar d-flex justify-content-between align-items-center shadow-sm px-3 py-2"
-     style="background:var(--card); border-bottom:1px solid #ddd;">
+<!-- TOPBAR FINAL -->
+<div class="topbar-wrapper">
+    <div class="topbar">
 
-    <!-- ✅ SEARCH MENU (FIXED) -->
-    <div style="width:320px">
-        <form method="GET" action="index.php" class="position-relative">
-            <input type="hidden" name="page" value="menu_admin">
-
-            <i class="bi bi-search position-absolute"
-            style="left:12px;top:50%;transform:translateY(-50%);color:var(--subtext)"></i>
-
-            <input 
-                class="form-control"
-                style="border-radius:30px;padding-left:35px;background:rgba(0,0,0,.03);border:none;"
-                placeholder="Cari menu, data..."
-                name="search"
-                value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
-            >
-        </form>
-    </div>
-
-    <!-- Right section -->
-    <div class="d-flex align-items-center gap-2 gap-md-3">
-
-        <!-- Theme toggle -->
-        <button class="btn btn-light border d-flex align-items-center justify-content-center"
-                style="width:42px;height:42px;border-radius:12px"
-                onclick="toggleTheme()" title="Dark/Light Mode">
-            <i class="bi bi-moon-stars"></i>
-        </button>
-
-        <!-- Notification -->
-        <div class="dropdown">
-            <button class="btn position-relative d-flex align-items-center justify-content-center <?php echo ($lowStockCount>0 ? 'bell-alert' : ''); ?>"
-                    data-bs-toggle="dropdown"
-                    style="width:42px;height:42px;border:none;background:none;border-radius:12px;">
-                <i class="bi bi-bell fs-5"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                      style="<?php echo $lowStockCount>0 ? '' : 'display:none;'; ?>">
-                    <?php echo $lowStockCount; ?>
-                </span>
-            </button>
-
-            <div class="dropdown-menu dropdown-menu-end p-0 shadow" style="min-width:320px;">
-                <div class="p-3 border-bottom d-flex align-items-center gap-2">
-                    <i class="bi bi-exclamation-triangle text-warning"></i>
-                    <strong>Stok Hampir Habis</strong>
-                </div>
-
-                <?php if($lowStockCount > 0): ?>
-                    <div class="list-group list-group-flush" style="max-height:260px; overflow:auto;">
-                        <?php foreach($lowStockMenus as $m): ?>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-semibold"><?php echo htmlspecialchars($m['nama_menu']); ?></div>
-                                <small class="text-muted">ID: <?php echo htmlspecialchars($m['id_menu']); ?></small>
-                            </div>
-                            <span class="badge rounded-pill bg-warning text-dark">
-                                <?php echo (int)$m['stok']; ?>
-                            </span>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <div class="p-2 text-end">
-                        <a href="index.php?page=menu_admin" class="btn btn-sm btn-outline-primary">Kelola Stok</a>
-                    </div>
-                <?php else: ?>
-                    <div class="p-3">
-                        <span class="text-success"><i class="bi bi-check2-square"></i> Semua stok aman</span>
-                    </div>
-                <?php endif; ?>
-            </div>
+        <!-- LEFT -->
+        <div class="topbar-left">
+            <form method="GET" action="index.php" class="search-form">
+                <input type="hidden" name="page" value="menu_admin">
+                <i class="bi bi-search search-icon"></i>
+                <input 
+                    class="form-control search-input"
+                    placeholder="Cari menu, data..."
+                    name="search"
+                    value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+                >
+            </form>
         </div>
 
-        <!-- Profile -->
-        <div class="dropdown">
-            <div class="profile-wrap dropdown-toggle" data-bs-toggle="dropdown" style="cursor:pointer;">
-                <img src="<?php echo htmlspecialchars($avatar); ?>" alt="avatar"
-                     class="rounded-circle flex-shrink-0"
-                     width="36" height="36" style="object-fit:cover;">
-                <div class="name-stack d-none d-md-flex">
-                    <strong class="user-name-short" title="<?php echo htmlspecialchars($rawName); ?>">
-                        <?php echo htmlspecialchars($shortName); ?>
-                    </strong>
-                    <small class="text-muted">Admin</small>
+        <!-- RIGHT -->
+        <div class="topbar-right">
+
+            <!-- Theme -->
+            <button class="btn action-btn" onclick="toggleTheme()">
+                <i class="bi bi-moon-stars"></i>
+            </button>
+
+            <!-- Notif -->
+            <div class="dropdown">
+                <button class="btn action-btn position-relative <?= ($lowStockCount>0?'bell-alert':'') ?>"
+                        data-bs-toggle="dropdown">
+                    <i class="bi bi-bell fs-5"></i>
+
+                    <?php if($lowStockCount>0): ?>
+                        <span class="notif-badge"><?= $lowStockCount ?></span>
+                    <?php endif ?>
+                </button>
+
+                <div class="dropdown-menu dropdown-menu-end shadow p-0" style="min-width:310px;">
+                    <div class="p-3 border-bottom d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                        <strong>Stok Hampir Habis</strong>
+                    </div>
+
+                    <?php if($lowStockCount > 0): ?>
+                        <div class="list-group list-group-flush" style="max-height:260px; overflow-y:auto;">
+                            <?php foreach($lowStockMenus as $m): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold"><?= htmlspecialchars($m['nama_menu']) ?></div>
+                                    <small class="text-muted">ID: <?= htmlspecialchars($m['id_menu']) ?></small>
+                                </div>
+                                <span class="badge bg-warning text-dark"><?= (int)$m['stok'] ?></span>
+                            </div>
+                            <?php endforeach ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="p-3 text-success">
+                            <i class="bi bi-check2"></i> Semua stok aman
+                        </div>
+                    <?php endif ?>
                 </div>
-                <i class="bi bi-caret-down-fill text-muted ms-1 d-none d-md-inline"></i>
             </div>
 
-            <ul class="dropdown-menu dropdown-menu-end shadow">
-                <li><a class="dropdown-item" href="index.php?page=profile_admin"><i class="bi bi-person"></i> Profil</a></li>
-                <li><a class="dropdown-item text-danger" href="index.php?page=logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-            </ul>
+            <!-- Profile -->
+            <div class="dropdown">
+                <div class="profile-wrap" data-bs-toggle="dropdown">
+
+                    <img src="<?= htmlspecialchars($avatar) ?>" 
+                         class="rounded-circle profile-avatar" width="38" height="38">
+
+                    <div class="profile-text d-none d-md-block">
+                        <div class="fw-semibold profile-name"><?= htmlspecialchars($shortName) ?></div>
+                        <small class="text-muted">Admin</small>
+                    </div>
+
+                    <!-- FIX caret kecil -->
+                    <i class="bi bi-chevron-down small ms-1 text-muted caret-profile"></i>
+                </div>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item" href="index.php?page=profile_admin"><i class="bi bi-person me-2"></i> Profil</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" id="btnLogout" href="index.php?do_logout=1">
+                            <i class="bi bi-box-arrow-right me-2"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
         </div>
     </div>
 </div>
 
 <style>
-.topbar .profile-wrap{
+.topbar-wrapper { width:100%; }
+
+/* MAIN CONTAINER */
+.topbar {
+    background:var(--card);
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid rgba(0,0,0,0.05);
+    box-shadow:0 3px 10px rgba(0,0,0,0.04);
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:15px;
+}
+
+/* LEFT */
+.topbar-left { flex:1; }
+.search-form { position:relative; }
+.search-icon {
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    color:var(--subtext);
+}
+.search-input {
+    padding:10px 15px 10px 40px;
+    border-radius:28px;
+    background:#f3f4f6;
+    border:none;
     min-height:42px;
 }
-.topbar .profile-wrap.dropdown-toggle::after{
-    display: none !important;
+
+/* RIGHT */
+.topbar-right {
+    display:flex; align-items:center; gap:6px;
 }
-.topbar .name-stack{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    min-height:36px;
-    line-height:1.1;
+
+.action-btn {
+    width:40px; height:40px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:10px;
+    background:transparent;
 }
-.topbar .user-name-short{
-    max-width:150px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+.action-btn:hover { background:#f5f5f5; }
+
+/* Notif badge */
+.notif-badge {
+    position:absolute;
+    top:4px; right:4px;
+    background:#ef4444; color:white;
+    font-size:10px;
+    padding:2px 6px; border-radius:999px;
 }
+
+/* Profile */
+.profile-wrap {
+    display:flex; align-items:center;
+    gap:8px; padding:6px 10px;
+    border-radius:10px; cursor:pointer;
+}
+.profile-wrap:hover { background:#f3f4f6; }
+
+.profile-avatar { object-fit:cover; }
+
+.caret-profile {
+    font-size: .75rem;       /* kecil */
+    margin-left: 4px;
+    margin-top: 2px;
+}
+
+/* Remove BS caret */
+.profile-wrap::after { display:none !important; }
 
 /* Bell animation */
 @keyframes ring {
-  0% { transform: rotate(0); }
-  10% { transform: rotate(10deg); }
-  20% { transform: rotate(-10deg); }
-  30% { transform: rotate(6deg); }
-  40% { transform: rotate(-6deg); }
-  50% { transform: rotate(3deg); }
-  60% { transform: rotate(-3deg); }
-  100% { transform: rotate(0); }
+    0%{transform:rotate(0)} 10%{transform:rotate(10deg)}
+    20%{transform:rotate(-10deg)} 30%{transform:rotate(6deg)}
+    40%{transform:rotate(-6deg)} 50%{transform:rotate(3deg)}
+    60%{transform:rotate(-3deg)} 100%{transform:rotate(0)}
 }
-.bell-alert i { animation: ring .8s ease infinite; transform-origin: top center; }
+.bell-alert i { animation:ring .9s infinite; transform-origin:top center; }
 </style>
+
+<script>
+// FIX: cegah loader saat buka dropdown profil & bell
+document.querySelectorAll('.profile-wrap, .action-btn[data-bs-toggle="dropdown"]').forEach(el => {
+    el.addEventListener('click', e => e.stopPropagation());
+});
+</script>
