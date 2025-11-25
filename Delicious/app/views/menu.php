@@ -1,9 +1,39 @@
 <title>Menu | Seblak Say cafe</title>
-<link href="assets/img/logo1.png" rel="icon">
-<link href="assets/img/logo1.png" rel="apple-touch-icon">
-<link href="assets/css/style.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Seblak Say cafe</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  
+  <!-- Favicons -->
+  <link href="assets/img/logo-atas.jpg" rel="icon">
+  <link href="assets/img/logo-atas.jpg" rel="apple-touch-icon">
 
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Satisfy:wght@400&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Delicious
+  * Template URL: https://bootstrapmade.com/delicious-free-restaurant-bootstrap-theme/
+  * Updated: Aug 07 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 
@@ -22,7 +52,7 @@ if (isset($_POST['add_to_cart']) && isset($_POST['qty'])) {
     $id = $_POST['add_to_cart'];
     $qty = max(1, intval($_POST['qty']));
     $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + $qty;
-    echo "<script>
+    "<script>
         Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Menu ditambahkan ke keranjang', timer: 1000, showConfirmButton: false });
     </script>";
 }
@@ -33,106 +63,62 @@ if (isset($_POST['remove_from_cart'])) {
     unset($_SESSION['cart'][$id]);
 }
 
-include 'app/views/sections/header_nav.php'; 
+include 'app/views/layout/header_nav.php'; 
 ?>
 
-<style>.page-wrapper { margin-top:180px!important; }</style>
-<link rel="stylesheet" href="assets/vendor/aos/aos.css">
+<?php 
+if(!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
+$cartCount = array_sum($_SESSION['cart']);
+?>
+
+<!-- FLOATING CART -->
+<?php if(($_GET['page'] ?? '') === 'menu' && !isset($_SESSION['admin'])): ?>
+<a onclick="openCart()" id="cartFloatBtn" class="cart-float-menu">
+  <i class="bi bi-cart3"></i>
+  <span class="cart-badge-menu"><?= $cartCount ?></span>
+</a>
 
 <style>
-/* CARD MENU HOVER ANIMATION */
-.menu-card {
-  width:230px;
-  background:#fff;
-  border-radius:14px;
-  padding:18px;
-  text-align:center;
-  box-shadow:0 6px 18px rgba(0,0,0,.08);
-  transition: .25s;
-  opacity:0;
-  animation:fadeUp .5s ease forwards;
+.cart-float-menu{
+  position:fixed;
+  top:120px;
+  right:25px;
+  height:60px;width:60px;
+  background:#ffc107;color:#000;border-radius:50%;
+  display:flex;justify-content:center;align-items:center;
+  font-size:26px;cursor:pointer;z-index:9999;
+  box-shadow:0 8px 18px rgba(0,0,0,.25);transition:.25s;
 }
-
-.menu-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 12px 28px rgba(0,0,0,.18);
+.cart-float-menu:hover{transform:scale(1.15);background:#ffcf3a;}
+.cart-badge-menu{
+  position:absolute;top:-5px;right:-5px;background:#e60023;color:#fff;
+  font-size:11px;font-weight:bold;min-width:20px;height:20px;line-height:18px;
+  border-radius:50%;text-align:center;border:2px solid #fff;
 }
-
-/* animasi zoom gambar waktu hover */
-.menu-card img {
-  width:140px;
-  height:140px;
-  object-fit:cover;
-  border-radius:12px;
-  margin-bottom:12px;
-  transition: .25s ease;
-}
-
-.menu-card:hover img{
-  transform: scale(1.08);
-}
-
-.menu-card img{
-  transition: .25s ease;
-}
-.menu-card:hover img{
-  transform: scale(1.1);
-  filter: brightness(1.05);
-}
-.menu-card:hover{
-  transform: translateY(-8px);
-  transition: .25s ease;
-}
-
-.menu-card-wrapper { display:flex; flex-wrap:wrap; gap:25px; justify-content:center; }
-.menu-card { width:230px; background:#fff; border-radius:14px; padding:18px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,.08); transition:.25s; opacity:0; animation:fadeUp .5s ease forwards; }
-.menu-card:hover{ transform:translateY(-6px); box-shadow:0 10px 24px rgba(0,0,0,.12); }
-.menu-card img{ width:140px; height:140px; object-fit:cover; border-radius:12px; margin-bottom:12px; transition:.25s;}
-.menu-card h5{font-size:1.05rem; font-weight:600;}
-.menu-card .stok{font-size:.9rem; color:#666;}
-.menu-card .harga{color:#e6a400; font-weight:700;}
-.btn-cart, .btn-pesan{ margin-top:10px; width:100%; padding:10px; border-radius:8px; border:none; font-weight:600; transition:.2s;}
-.btn-cart{ background:#fff; border:2px solid #ffca28; }
-.btn-cart:hover{ background:#ffca28; }
-.btn-pesan{ background:#ffc107; color:#fff; }
-.btn-pesan:hover{ background:#ffca2c; }
-.menu-card.sold-out img { filter: grayscale(100%) brightness(65%); }
-.label-soldout { position:absolute; top:8px; left:8px; background:rgba(200,0,0,.95); color:#fff; font-weight:700; font-size:.8rem; padding:5px 10px; border-radius:6px;}
-.disabled-btn{ background:#ccc !important; color:#555 !important; cursor:not-allowed; }
-@keyframes fadeUp { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
 </style>
+<?php endif; ?>
+
+<!-- <style>.page-wrapper { margin-top:180px!important; }</style> -->
+<link rel="stylesheet" href="assets/vendor/aos/aos.css">
+
+<section class="section light-background">
+
 
 <div class="page-wrapper">
 <div class="container my-5" data-aos="fade-up">
 
 
-<!-- <div class="modal fade" id="cartModal"><div class="modal-dialog modal-lg"><div class="modal-content">
+<div class="modal fade" id="cartModal"><div class="modal-dialog modal-lg"><div class="modal-content">
   <div class="modal-header bg-warning"><h5 class="fw-bold"><i class="bi bi-cart"></i> Keranjang</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-  <div class="modal-body" id="cartContent"><div class="text-center py-5">Memuat...</div></div>
+  <div class="modal-body" id="cartContent"><div class="text-center py-5"></div></div>
 </div></div></div>
-
-<div class="modal fade" id="modalPesan"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-<form id="formPesan" action="app/controllers/pesan_process.php" method="POST">
-<div class="modal-header bg-warning"><h5 class="fw-bold"><i class="bi bi-bag-check"></i> Pesan Menu</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-<div class="modal-body">
-<input type="hidden" id="id_menu" name="id_menu">
-<input type="hidden" id="harga_hidden" name="harga">
-<div class="mb-2"><label>Nama Menu</label><input id="nama_menu" class="form-control" readonly></div>
-<div class="mb-2"><label>Harga</label><input id="harga_menu" class="form-control" readonly></div>
-<div class="mb-2"><label>Jumlah</label><input type="number" id="jumlah" name="jumlah" class="form-control" min="1" value="1"></div>
-<div class="mb-2"><label>Total</label><input id="total_harga" class="form-control" readonly></div>
-<div class="mb-2"><label>Metode Pembayaran</label>
-<select name="jenis_transaksi" class="form-control" required>
-<option value="Tunai">Tunai</option>
-<option value="Transfer">Transfer</option>
-</select></div>
-</div>
-<div class="modal-footer"><button class="btn btn-warning fw-bold">Pesan Sekarang</button></div>
-</form></div></div></div> -->
 
 <div class="menu-card-wrapper">
 <?php foreach ($menus as $menu):
-  $stok = $menu['stok']; $sold = $stok <= 0; ?>
+  $stok = $menu['stok'];
+  $sold = $stok <= 0; 
+  ?>
+
 <div class="menu-card <?= $sold?'sold-out':'' ?>">
   <div style="position:relative;">
     <img src="assets/img/menu/<?= $menu['gambar']; ?>">
@@ -152,68 +138,14 @@ include 'app/views/sections/header_nav.php';
 
 </div></div>
 
-<footer id="footer" class="footer dark-background">
+</section>
 
-    <div class="container">
-      <div class="row gy-3">
-        <div class="col-lg-3 col-md-6 d-flex">
-          <i class="bi bi-geo-alt icon"></i>
-          <div class="address">
-            <h4>Address</h4>
-             <p>Jl. Warujayeng - Kediri, RT.02/RW.06, Krajan Selatan, Kampungbaru, Kec. Tanjunganom, Kabupaten Nganjuk, Jawa Timur 64482
-</p>
-            <p></p>
-          </div>
+<?php
+include 'app/views/layout/footer.php'
+?>
 
-        </div>
 
-        <div class="col-lg-3 col-md-6 d-flex">
-          <i class="bi bi-telephone icon"></i>
-          <div>
-            <h4>Contact</h4>
-            <p>
-              <strong>Phone:</strong> <span>+1 5589 55488 55</span><br>
-              <strong>Email:</strong> <span>info@example.com</span><br>
-            </p>
-          </div>
-        </div>
 
-        <div class="col-lg-3 col-md-6 d-flex">
-          <i class="bi bi-clock icon"></i>
-          <div>
-            <h4>Opening Hours</h4>
-            <p>
-              <strong>Mon-Sat:</strong> <span>11AM - 23PM</span><br>
-              <strong>Sunday</strong>: <span>Closed</span>
-            </p>
-          </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-          <h4>Follow Us</h4>
-          <div class="social-links d-flex">
-            <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
-            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-            <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="px-1 sitename">Seblak Say Cafe</strong> <span>All Rights Reserved</span></p>
-     Designed by 
-      <a href="#" onclick="window.location='index.php?page=dashboard'" style="opacity:0.2; color:#ffca28; text-decoration:none;"
-        onmouseover="this.style.opacity=1" 
-        onmouseout="this.style.opacity=0.2">
-      Nothing
-      </a>
-      </div>
-    </div>
-
-  </footer>
 
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/aos/aos.js"></script>
@@ -326,3 +258,78 @@ if (urlParams.get("status") === "success") {
 }
 
 </script>
+
+<style>
+/* CARD MENU HOVER ANIMATION */
+.menu-card {
+  width:230px;
+  background:#fff;
+  border-radius:14px;
+  padding:18px;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  transition: .25s;
+  opacity:0;
+  animation:fadeUp .5s ease forwards;
+}
+
+.menu-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+
+/* animasi zoom gambar waktu hover */
+.menu-card img {
+  width:140px;
+  height:140px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:12px;
+  transition: .25s ease;
+}
+
+.menu-card:hover img{
+  transform: scale(1.08);
+}
+
+.menu-card img{
+  transition: .25s ease;
+}
+.menu-card:hover img{
+  transform: scale(1.1);
+  filter: brightness(1.05);
+}
+.menu-card:hover{
+  transform: translateY(-8px);
+  transition: .25s ease;
+}
+
+.menu-card-wrapper { display:flex; flex-wrap:wrap; gap:25px; justify-content:center; }
+.menu-card { width:230px; background:#fff; border-radius:14px; padding:18px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,.08); transition:.25s; opacity:0; animation:fadeUp .5s ease forwards; }
+.menu-card:hover{ transform:translateY(-6px); box-shadow:0 10px 24px rgba(0,0,0,.12); }
+.menu-card img{ width:140px; height:140px; object-fit:cover; border-radius:12px; margin-bottom:12px; transition:.25s;}
+.menu-card h5{font-size:1.05rem; font-weight:600;}
+.menu-card .stok{font-size:.9rem; color:#666;}
+.menu-card .harga{color:#e6a400; font-weight:700;}
+.btn-cart, .btn-pesan{ margin-top:10px; width:100%; padding:10px; border-radius:8px; border:none; font-weight:600; transition:.2s;}
+.btn-cart{ background:#fff; border:2px solid #ffca28; }
+.btn-cart:hover{ background:#ffca28; }
+.btn-pesan{ background:#ffc107; color:#fff; }
+.btn-pesan:hover{ background:#ffca2c; }
+.menu-card.sold-out img { filter: grayscale(100%) brightness(65%); }
+.label-soldout { position:absolute; top:8px; left:8px; background:rgba(200,0,0,.95); color:#fff; font-weight:700; font-size:.8rem; padding:5px 10px; border-radius:6px;}
+.disabled-btn{ background:#ccc !important; color:#555 !important; cursor:not-allowed; }
+@keyframes fadeUp { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+</style>
+
+ <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>

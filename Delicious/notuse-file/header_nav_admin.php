@@ -1,4 +1,4 @@
-<!-- SEARCH ADMIN -->
+<!-- SEARCH ADMIN
 <form method="GET" action="index.php" class="d-none d-md-flex align-items-center me-3" style="width:250px;">
     <input type="hidden" name="page" value="menu_admin">
     
@@ -14,4 +14,4 @@
             <i class="bi bi-search"></i>
         </button>
     </div>
-</form>
+</form> -->

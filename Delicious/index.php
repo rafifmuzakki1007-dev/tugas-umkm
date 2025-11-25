@@ -7,13 +7,13 @@ ini_set('display_errors', 1);
 
 require_once 'config/koneksi.php';
 require_once 'app/models/MenuModel.php';
-require_once 'app/models/KaryawanModel.php';
+// require_once 'app/models/ToppingModel.php';
 
 $menuModel = new MenuModel($koneksi);
-$karyawanModel = new KaryawanModel($koneksi);
+// $toppingModel = new ToppingModel($koneksi);
 
 // pastikan selalu array (anti Warning chefs)
-$karyawans = $karyawanModel->getAllKaryawan() ?? [];
+// $karyawans = $karyawanModel->getAllKaryawan() ?? [];
 
 $page = isset($_GET['page']) ? strtolower($_GET['page']) : 'home';
 
@@ -53,6 +53,11 @@ if ($page === 'order_success') {
 if ($page === 'menu') {
     $menus = $menuModel->getAllMenu();
     include "app/views/menu.php";
+    exit;
+}
+
+if ($page === 'about') {
+    include "app/views/about.php";
     exit;
 }
 
