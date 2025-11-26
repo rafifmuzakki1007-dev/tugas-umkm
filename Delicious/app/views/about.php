@@ -122,7 +122,7 @@
       <div id="hero-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
 
         <div class="carousel-item active">
-          <img src="assets/img/hero-carousel/bg2.jpeg" alt="">
+          <img src="assets/img/bg-login.jpg" alt="">
           <div class="carousel-container">
             <h2><span>About</span></h2>
           </div>

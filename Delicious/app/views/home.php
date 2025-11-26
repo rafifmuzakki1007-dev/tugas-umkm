@@ -122,26 +122,17 @@
 
       <div id="hero-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
 
+        
         <div class="carousel-item active">
-          <img src="assets/img/hero-carousel/hero-carousel-1.jpg" alt="">
-          <div class="carousel-container">
-            <h2><span>Seblak</span> Say Cafe </h2>
-            <p>Tempat sederhana yang berbicara lewat rasa.</p>
-          </div>
-        </div><!-- End Carousel Item -->
-
-        <div class="carousel-item">
           <img src="assets/img/hero-carousel/bg-login.jpg" alt="">
           <div class="carousel-container">
             <h2><span>Seblak</span> Say Cafe </h2>
-            <p>Nikmati cita rasa pedas - gurih hanya disini.</p>
+            <p>Enjoy the spicy and savory taste only here</p>
           </div>
         </div><!-- End Carousel Item -->
 
-      <ol class="carousel-indicators"></ol>
-
     </div>
-
+ 
     </section><!-- /Hero Section -->
 
 
@@ -153,6 +144,12 @@
 
         <!-- Ganti yang ini saja (satu baris) -->
 <div class="row gy-4 flex-column-reverse flex-md-row">
+
+ <!-- Gambar jadi di bawah teks (hanya di mobile) -->
+  <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="100">
+    <img src="assets/img/hero-carousel/bg-hero.png" class="img-fluid" alt="Seblak Say Cafe" style="border: 2px solid #333;">
+  </div>
+  
   <!-- Teks dulu di mobile, gambar sesudahnya -->
   <div class="col-lg-6 content align-self-center text-center" data-aos="fade-up" data-aos-delay="200">
     <h3 class="fs-2">
@@ -183,11 +180,6 @@
       </style>
       
     </a>
-  </div>
-
-  <!-- Gambar jadi di bawah teks (hanya di mobile) -->
-  <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="100">
-    <img src="assets/img/about.jpg" class="img-fluid" alt="Seblak Say Cafe" style="border: 2px solid #8B4513;;">
   </div>
 </div>
       </div>
@@ -231,15 +223,15 @@
             <div class="card-item">
               
               <h4 class="stretched-link">Rumah Semua Kalangan</h4>
-              <p>Mulai dari anak sekolah sampai ibu-ibu yang lewat pun hadir. Kami selalu sedia..</p>
+              <p>Disini kami menyediakan tempat yang pastinya nyaman buat kalian, Jadi jangan lupa mampir yaa!</p>
             </div>
           </div><!-- Card Item -->
 
           <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
             <div class="card-item">
               
-              <h4 class="stretched-link">Home Deliverry</h4>
-              <p>Kami juga menyediakan pesan online loo.. Tinggal klik order online maka pesananmu akan sampai kerumah</p>
+              <h4 class="stretched-link">Online Deliverry</h4>
+              <p>Mager keluar? Ngga masalah.. klik "order online" sekarang maka pesananmu akan sampai kerumah</p>
             </div>
           </div><!-- Card Item -->
 
@@ -253,7 +245,7 @@
 
 
     <!-- menu section -->
-    <section id="menu" class="menu section">
+    <section id="menu" class="about section">
   <div class="container">
 
   <!-- Section Title -->
@@ -280,35 +272,35 @@
           View Menu
         <style>
           .btn {
-  color: var(--contrast-color);
-  background: var(--accent-color);
-  font-weight: 500;
-  font-size: 14px;
-  letter-spacing: 1px;
-  padding: 8px 28px;
-  border-radius: 50px;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: 0.3s;
-}
+          color: var(--contrast-color);
+          background: var(--accent-color);
+          font-weight: 500;
+          font-size: 14px;
+          letter-spacing: 1px;
+          padding: 8px 28px;
+          border-radius: 50px;
+          text-decoration: none;
+          white-space: nowrap;
+          transition: 0.3s;
+          }
 
-.btn:hover{transform:scale(1.15);background:#ffcf3a;}
+          .btn:hover{transform:scale(1.15);background:#ffcf3a;}
        
        </style>
         </a>
       </div>
       
-      <div class="col-lg-3 col-md-4 dark-background">
+      <div class="col-lg-3 col-md-4">
             <div class="gallery-item">
-              <a href="assets/img/gallery/seblak-img.jpg" class="glightbox" data-gallery="images-gallery">
-                <img src="assets/img/gallery/seblak-img.jpg" alt="" class="img-fluid" style="border: 5px solid #c68252ff;;">
+              <a href="assets/img/gallery/seblak-3.png" class="glightbox" data-gallery="images-gallery">
+                <img src="assets/img/gallery/seblak-3.png" alt="" class="img-fluid" style="border: 5px solid #c68252ff;;">
               </a>
             </div>
           </div><!-- End Gallery Item -->
           <div class="col-lg-3 col-md-4">
             <div class="gallery-item">
-              <a href="assets/img/gallery/seblak-2.png" class="glightbox" data-gallery="images-gallery">
-                <img src="assets/img/gallery/seblak-2.png" alt="" class="img-fluid" style="border: 5px solid #8B4513;;">
+              <a href="assets/img/gallery/seblak-4.png" class="glightbox" data-gallery="images-gallery">
+                <img src="assets/img/gallery/seblak-4.png" alt="" class="img-fluid" style="border: 5px solid #8B4513;;">
               </a>
             </div>
           </div><!-- End Gallery Item -->
