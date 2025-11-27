@@ -1,6 +1,8 @@
-<?php
+<?php  
+// index.php — FULL FINAL FIX
 ob_start();
-if (session_status() === PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE)
+    session_start();
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -11,99 +13,116 @@ require_once 'app/models/KaryawanModel.php';
 
 $menuModel = new MenuModel($koneksi);
 $karyawanModel = new KaryawanModel($koneksi);
-
-// agar tidak warning
 $karyawans = $karyawanModel->getAllKaryawan() ?? [];
 
 $page = isset($_GET['page']) ? strtolower($_GET['page']) : 'home';
 
-/* ==================================================
-   FIX LOGOUT — versi B (aman & stabil)
-   URL: index.php?do_logout=1
-================================================== */
-if (isset($_GET['do_logout'])) {
+/* =====================================================
+   DETEKSI AJAX (dipakai agar kita tdk mengekspor HTML/JS
+   saat meng-handle request AJAX seperti pesan_process)
+===================================================== */
+$isAjax = false;
+if (
+    isset($_POST['from_ajax']) && $_POST['from_ajax'] == '1'
+    || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+) {
+    $isAjax = true;
+}
 
-    // Hapus semua data sesi
-    session_unset();
+/* =====================================================
+   GLOBAL FIX — HAPUS BACKDROP (only on normal page loads)
+   Jangan cetak ini ketika request AJAX (mengacaukan JSON)
+===================================================== */
+if (!$isAjax) {
+    echo "<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.modal-backdrop').forEach(x => x.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+    });
+    </script>";
+}
 
-    // Hancurkan sesi
-    session_destroy();
-
-    // Hentikan cookie session agar benar-benar logout
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params["path"],
-            $params["domain"],
-            $params["secure"],
-            $params["httponly"]
-        );
+/* =====================================================
+   pesan_process via AJAX ONLY
+===================================================== */
+if ($page === 'pesan_process') {
+    if (!empty($_POST['from_ajax']) || $isAjax) {
+        include "app/controllers/pesan_process.php";
+        exit;
     }
+}
 
+/* =====================================================
+   LOGOUT
+===================================================== */
+if (isset($_GET['do_logout'])) {
+    session_unset();
+    session_destroy();
     header("Location: index.php?page=home");
     exit;
 }
 
-/* ==================================================
-   ADMIN PAGE LIST
-================================================== */
-$admin_pages = ['dashboard', 'menu_admin', 'transaksi_admin', 'profile_admin'];
+/* =====================================================
+   ADMIN ROUTES
+===================================================== */
+$admin_pages = ['dashboard','menu_admin','transaksi_admin','profile_admin'];
 
-/* ==================================================
-   ADMIN ROUTING
-================================================== */
 if (in_array($page, $admin_pages)) {
-
-    // pastikan sudah login admin
     if (!isset($_SESSION['admin_logged_in'])) {
         header("Location: login.php");
         exit;
     }
-
     include "app/views/admin/layout_admin.php";
     exit;
 }
 
-/* ==================================================
-   USER ROUTES
-================================================== */
+/* =====================================================
+   PUBLIC ROUTES
+===================================================== */
+switch ($page) {
 
-if ($page === 'order_success') {
-    include "app/views/order_success.php";
-    exit;
+    case 'order_success':
+        include "app/views/order_success.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'menu':
+        $menus = $menuModel->getAllMenu();
+        include "app/views/menu.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'cart':
+        include "app/views/cart.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'riwayat':
+        include "app/views/riwayat.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'login':
+        if (file_exists("login.php")) include "login.php";
+        else echo "Halaman login tidak ditemukan.";
+        include "app/views/checkout.php";
+        break;
+
+    /* ======================================================
+       MODE /checkout → tampilkan menu + buka drawer manual
+    ====================================================== */
+    case 'checkout':
+        $menus = $menuModel->getAllMenu();
+        include "app/views/menu.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'home':
+    default:
+        $menus = $menuModel->getAllMenu();
+        include "app/views/home.php";
+        include "app/views/checkout.php";
+        break;
 }
-
-if ($page === 'menu') {
-    $menus = $menuModel->getAllMenu();
-    include "app/views/menu.php";
-    exit;
-}
-
-if ($page === 'pesan_process') {
-    include "app/controllers/pesan_process.php";
-    exit;
-}
-
-if ($page === 'cart') {
-    include "app/views/cart.php";
-    exit;
-}
-
-if ($page === 'riwayat') {
-    include "app/views/riwayat.php";
-    exit;
-}
-
-if ($page === 'login') {
-    include file_exists("login.php") ? "login.php" : "Halaman login tidak ditemukan.";
-    exit;
-}
-
-/* ==================================================
-   DEFAULT HOME
-================================================== */
-$menus = $menuModel->getAllMenu();
-include "app/views/home.php";
+?>
