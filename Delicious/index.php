@@ -1,98 +1,128 @@
-<?php
+index.php = <?php  
+// index.php — FULL FINAL FIX
 ob_start();
-if (session_status() === PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE)
+    session_start();
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once 'config/koneksi.php';
 require_once 'app/models/MenuModel.php';
-// require_once 'app/models/ToppingModel.php';
+require_once 'app/models/KaryawanModel.php';
 
 $menuModel = new MenuModel($koneksi);
-// $toppingModel = new ToppingModel($koneksi);
-
-// pastikan selalu array (anti Warning chefs)
-// $karyawans = $karyawanModel->getAllKaryawan() ?? [];
+$karyawanModel = new KaryawanModel($koneksi);
+$karyawans = $karyawanModel->getAllKaryawan() ?? [];
 
 $page = isset($_GET['page']) ? strtolower($_GET['page']) : 'home';
 
-/* ---------------- ADMIN PAGE LIST ---------------- */
-$admin_pages = ['dashboard', 'menu_admin', 'transaksi_admin', 'profile_admin'];
+/* =====================================================
+   DETEKSI AJAX (dipakai agar kita tdk mengekspor HTML/JS
+   saat meng-handle request AJAX seperti pesan_process)
+===================================================== */
+$isAjax = false;
+if (
+    isset($_POST['from_ajax']) && $_POST['from_ajax'] == '1'
+    || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+) {
+    $isAjax = true;
+}
 
-/* ---------------- LOGOUT ---------------- */
-if ($page === 'logout') {
+/* =====================================================
+   GLOBAL FIX — HAPUS BACKDROP (only on normal page loads)
+   Jangan cetak ini ketika request AJAX (mengacaukan JSON)
+===================================================== */
+if (!$isAjax) {
+    echo "<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.modal-backdrop').forEach(x => x.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+    });
+    </script>";
+}
+
+/* =====================================================
+   pesan_process via AJAX ONLY
+===================================================== */
+if ($page === 'pesan_process') {
+    if (!empty($_POST['from_ajax']) || $isAjax) {
+        include "app/controllers/pesan_process.php";
+        exit;
+    }
+}
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+if (isset($_GET['do_logout'])) {
     session_unset();
     session_destroy();
     header("Location: index.php?page=home");
     exit;
 }
 
-/* ---------------- ADMIN ROUTING ---------------- */
-if (in_array($page, $admin_pages)){
+/* =====================================================
+   ADMIN ROUTES
+===================================================== */
+$admin_pages = ['dashboard','menu_admin','transaksi_admin','profile_admin'];
 
+if (in_array($page, $admin_pages)) {
     if (!isset($_SESSION['admin_logged_in'])) {
         header("Location: login.php");
         exit;
     }
-
-    // Lewat layout admin agar design tetap konsisten
     include "app/views/admin/layout_admin.php";
     exit;
 }
 
-/* ---------------- USER ROUTES ---------------- */
+/* =====================================================
+   PUBLIC ROUTES
+===================================================== */
+switch ($page) {
 
-//Halaman sukses setelah pesan
-if ($page === 'order_success') {
-    include "app/views/order_success.php";
-    exit;
+    case 'order_success':
+        include "app/views/order_success.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'menu':
+        $menus = $menuModel->getAllMenu();
+        include "app/views/menu.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'cart':
+        include "app/views/cart.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'riwayat':
+        include "app/views/riwayat.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'login':
+        if (file_exists("login.php")) include "login.php";
+        else echo "Halaman login tidak ditemukan.";
+        include "app/views/checkout.php";
+        break;
+
+    /* ======================================================
+       MODE /checkout → tampilkan menu + buka drawer manual
+    ====================================================== */
+    case 'checkout':
+        $menus = $menuModel->getAllMenu();
+        include "app/views/menu.php";
+        include "app/views/checkout.php";
+        break;
+
+    case 'home':
+    default:
+        $menus = $menuModel->getAllMenu();
+        include "app/views/home.php";
+        include "app/views/checkout.php";
+        break;
 }
-
-//Halaman menu
-if ($page === 'menu') {
-    $menus = $menuModel->getAllMenu();
-    include "app/views/menu.php";
-    exit;
-}
-
-if ($page === 'about') {
-    include "app/views/about.php";
-    exit;
-}
-
-//Proses pesanan
-if ($page === 'pesan_process') {
-    include "app/controllers/pesan_process.php";
-    exit;
-}
-
-//Cart
-if ($page === 'cart') {
-    include "app/views/cart.php";
-    exit;
-}
-
-//Riwayat Pesanan User
-if ($page === 'riwayat') {
-    include "app/views/riwayat.php";
-    exit;
-}
-
-//Login
-if ($page === 'login') {
-    if (file_exists("login.php")) {
-        include "login.php";
-    } else {
-        echo "<h3>Halaman login tidak ditemukan.</h3>";
-    }
-    exit;
-}
-
-/* 
----------------- DEFAULT → HOME ----------------
-Jika user klik "Chefs" di navbar → sebenarnya hanya scroll (#chefs)
-Jadi tetap load home.php
-*/
-$menus = $menuModel->getAllMenu();
-include "app/views/home.php";
+?>
