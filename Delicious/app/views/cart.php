@@ -14,13 +14,13 @@ require_once __DIR__ . "/../../config/koneksi.php";
 $ids = array_keys($_SESSION['cart']);
 $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-$stmt = $koneksi->prepare("SELECT id_topping,nama_topping,harga,gambar FROM topping WHERE id_topping IN ($placeholders)");
+$stmt = $koneksi->prepare("SELECT id_menu,nama_menu,harga,gambar FROM menu WHERE id_menu IN ($placeholders)");
 foreach ($ids as $i=>$id) $stmt->bindValue($i+1,$id);
 $stmt->execute();
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $map = [];
-foreach ($rows as $r) $map[$r['id_topping']] = $r;
+foreach ($rows as $r) $map[$r['id_menu']] = $r;
 
 $grandTotal = 0;
 ?>
@@ -49,9 +49,9 @@ $grandTotal = 0;
 <tr>
   <td>
     <div class="d-flex align-items-center gap-3">
-      <img src="assets/img/topping/<?= htmlspecialchars($t['gambar']); ?>" 
+      <img src="assets/img/menu/<?= htmlspecialchars($t['gambar']); ?>" 
            style="width:60px;height:48px;object-fit:cover;border-radius:8px;">
-      <div><strong><?= htmlspecialchars($t['nama_topping']); ?></strong></div>
+      <div><strong><?= htmlspecialchars($t['nama_menu']); ?></strong></div>
     </div>
   </td>
 

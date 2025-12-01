@@ -9,11 +9,11 @@ ini_set('display_errors', 1);
 
 require_once 'config/koneksi.php';
 require_once 'app/models/MenuModel.php';
-require_once 'app/models/KaryawanModel.php';
+// require_once 'app/models/KaryawanModel.php';
 
 $menuModel = new MenuModel($koneksi);
-$karyawanModel = new KaryawanModel($koneksi);
-$karyawans = $karyawanModel->getAllKaryawan() ?? [];
+// $karyawanModel = new KaryawanModel($koneksi);
+// $karyawans = $karyawanModel->getAllKaryawan() ?? [];
 
 $page = isset($_GET['page']) ? strtolower($_GET['page']) : 'home';
 
@@ -88,9 +88,13 @@ switch ($page) {
         break;
 
     case 'menu':
-        $menus = $menuModel->getAllMenu();
+        $menus = $menuModel->getAll();
         include "app/views/menu.php";
         include "app/views/checkout.php";
+        break;
+
+    case 'about':
+        include "app/views/about.php";
         break;
 
     case 'cart':
@@ -113,14 +117,14 @@ switch ($page) {
        MODE /checkout → tampilkan menu + buka drawer manual
     ====================================================== */
     case 'checkout':
-        $menus = $menuModel->getAllMenu();
+        $menus = $menuModel->getAll();
         include "app/views/menu.php";
         include "app/views/checkout.php";
         break;
 
     case 'home':
     default:
-        $menus = $menuModel->getAllMenu();
+        $menus = $menuModel->getAll();
         include "app/views/home.php";
         include "app/views/checkout.php";
         break;

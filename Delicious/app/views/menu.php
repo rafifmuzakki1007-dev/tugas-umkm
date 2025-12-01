@@ -1,874 +1,463 @@
-<?php  
-if (session_status() === PHP_SESSION_NONE) session_start();
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Menu | Seblak Say cafe</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    
+    <!-- Favicons -->
+    <link href="assets/img/logo-atas.jpg" rel="icon">
+    <link href="assets/img/logo-atas.jpg" rel="apple-touch-icon">
 
-require_once 'config/koneksi.php';
-require_once 'app/models/MenuModel.php';
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Satisfy:wght@400&display=swap" rel="stylesheet">
 
-$menuModel = new MenuModel($koneksi);
+    <!-- Vendor CSS Files -->
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
-$menuMainQuery = $koneksi->query("SELECT * FROM menu WHERE kategori='utama' LIMIT 1");
-$menuMain = $menuMainQuery->fetch(PDO::FETCH_ASSOC);
+    <!-- Main CSS File -->
+    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-$toppingStmt = $koneksi->query("SELECT * FROM topping ORDER BY id_topping ASC");
-$toppingsRaw = $toppingStmt->fetchAll(PDO::FETCH_ASSOC);
+    <!-- =======================================================
+    * Template Name: Delicious
+    * Template URL: https://bootstrapmade.com/delicious-free-restaurant-bootstrap-theme/
+    * Updated: Aug 07 2024 with Bootstrap v5.3.3
+    * Author: BootstrapMade.com
+    * License: https://bootstrapmade.com/license/
+    ======================================================== -->
+    </head>
 
-$available = [];
-$sold = [];
-foreach ($toppingsRaw as $t) {
-    $isSold = isset($t['stok']) && intval($t['stok']) <= 0;
-    if ($isSold) $sold[] = $t;
-    else $available[] = $t;
-}
-$toppings = array_merge($available, $sold);
+    <?php
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    require_once 'config/koneksi.php';
 
-$drinkStmt = $koneksi->query("SELECT * FROM menu WHERE kategori='minuman' ORDER BY id_menu ASC");
-$drinks = $drinkStmt->fetchAll(PDO::FETCH_ASSOC);
+    if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
 
-$snackStmt = $koneksi->query("SELECT * FROM menu WHERE kategori='camilan' ORDER BY id_menu ASC");
-$snacks = $snackStmt->fetchAll(PDO::FETCH_ASSOC);
-
-// init cart
-if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-
-/* ======= HANDLE POST (PRG) ======= */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // ADD to cart (topping flow)
-    if (isset($_POST['add_to_cart'])) {
-        $id = trim($_POST['add_to_cart']);
-        $qty = isset($_POST['qty']) ? max(1, intval($_POST['qty'])) : 1;
-        if ($id !== '') {
-            $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + $qty;
-            $_SESSION['flash_add'] = true;
-        }
+    // Handle tambah ke keranjang
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+        $id = $_POST['add_to_cart'];
+        $qty = max(1, (int)($_POST['qty'] ?? 1));
+        $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + $qty;
+        $_SESSION['flash'] = 'Item ditambahkan ke keranjang!';
         header("Location: " . $_SERVER['REQUEST_URI']);
         exit;
     }
 
-    // REMOVE from cart (topping flow)
-    if (isset($_POST['remove_from_cart'])) {
-        $id = trim($_POST['remove_from_cart']);
-        if ($id !== '' && isset($_SESSION['cart'][$id])) {
-            unset($_SESSION['cart'][$id]);
-            $_SESSION['flash_remove'] = true;
-        }
-        header("Location: " . $_SERVER['REQUEST_URI']);
-        exit;
+    // Ambil semua menu + kelompokkan berdasarkan kategori
+    $stmt = $koneksi->query("SELECT * FROM menu");
+    $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $grouped = [];
+    foreach ($all as $m) {
+        $kat = $m['kategori'] ?? 'lainnya';
+        // Ubah nama kategori biar rapi
+        $namaKat = match(strtolower($kat)) {
+            'menu utama' => 'Seblak',
+            'minuman' => 'Minuman',
+            'camilan' => 'Camilan',
+            default => ucwords($kat)
+        };
+        $grouped[$namaKat][] = $m;
     }
-}
 
-// include header
-include 'app/views/sections/header_nav.php';
-?>
+    // include 'app/views/sections/header_nav.php';
+    ?>
 
-<!-- LOCAL STYLES -->
-<style>
-:root{
-  --gold:#ffca28;
-  --accent:#e6a400;
-  --dark:#222;
-  --muted:#6b6b6b;
-  --card-shadow: 0 18px 48px rgba(12,12,12,.08);
-  --white:#ffffff;
-  --glass: rgba(255,255,255,0.75);
-  --glass-strong: rgba(255,255,255,0.88);
-  --glass-border: rgba(255,255,255,0.22);
-  --tab-indicator: rgba(230,164,0,0.12);
-}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-/* PAGE */
-/* page-wrapper margin reduced because hero now has its own offset */
-.page-wrapper{
-  margin-top:40px !important;
-  padding-bottom:100px;
-  background:linear-gradient(180deg,#fff 0%, #fbfaf9 100%);
-}
+    <div class="container">
 
-.hero {
-    width: 100%;
-    margin-top: 78px;
-    margin-bottom: auto;
-    background-image: url('assets/img/hero/hero-banner.png');
-    background-size: contain !important;  /* FULL TANPA TERPOTONG */
-    background-repeat: no-repeat !important;
-    background-position: center center !important;
-    background-color: #111; /* fallback warna gelap */
-    
-    /* tinggi hero dibuat presisi mirip McD */
-    height: 390px;      
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: visible;
-}
+        <?php foreach ($grouped as $kategori => $menus): ?>
+            <h2 class="cat-title"><?= $kategori ?></h2>
+            
+            <div class="menu-grid">
+                <?php foreach ($menus as $m): 
+                    $isSeblak = strtolower($m['kategori'] ?? '') === 'menu utama';
+                ?>
+                    <div class="menu-item position-relative"
+                                onclick="<?= $isSeblak 
+                                ? "openSeblakModal('{$m['id_menu']}', '".addslashes($m['nama_menu'])."')" 
+                                : "addToCart('{$m['id_menu']}', '".addslashes($m['nama_menu'])."', ".($m['harga']??0).")" ?>">
 
-.hero-img{
-  width:100%;
-  height:auto;
-  display:block;
-  object-fit: cover;
-  -o-object-fit: cover;
-  max-height: 720px; 
-}
+                        <?php if (stripos($m['nama_menu'], 'baru') !== false): ?>
+                            <div class="badge-new">BARU</div>
+                        <?php endif; ?>
 
-.hero::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.26) 0%, rgba(0,0,0,0.06) 45%, rgba(255,255,255,0.00) 100%);
-  pointer-events:none;
-  z-index:1;
-}
+                        <?php 
+                        $path = __DIR__ . '/../../assets/img/menu/' . $m['gambar'];
+                            if (!empty($m['gambar']) && file_exists($path)): ?>
+                                <img src="assets/img/menu/<?= htmlspecialchars($m['gambar']) ?>" 
+                                    class="card-img-top rounded" 
+                                    alt="<?= htmlspecialchars($m['nama_menu']) ?>"
+                                    style="height:240px; object-fit:cover;">
+                        <?php else: ?>
+                                <div style="height:240px;background:#f8f8f8;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:1.3rem;border-radius:0.5rem;">
+                                    Tidak ada gambar 
+                                </div> 
+                        <?php endif; ?>
 
-.hero-inner{
-  max-width:1180px;
-  margin:0 auto;
-  padding:6px 20px;
-  display:flex;
-  gap:20px;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  text-align:center;
-  z-index:2;
-  position:relative;
-  transform: translateY(12px);
-  opacity:0;
-  animation: heroFadeIn .9s cubic-bezier(.2,.9,.2,1) .18s forwards;
-}
-@keyframes heroFadeIn {
-  to { transform: translateY(0); opacity:1; }
-}
 
-.hero-floating{
-  position:absolute;
-  inset:auto;
-  z-index:3;
-  pointer-events:none;
-  width:100%;
-  height:100%;
-  top:36px;
-  left:0;
-  overflow:visible;
-}
-.floating-item{
-  position:absolute;
-  will-change: transform, opacity;
-  filter: drop-shadow(0 18px 40px rgba(0,0,0,.28));
-  opacity:0;
-  transform: translateY(28px) scale(.94);
-  animation: floatIn .9s cubic-bezier(.2,.9,.2,1) forwards;
-}
-@keyframes floatIn {
-  to { opacity:1; transform: translateY(0) scale(1); }
-}
-/* gentle bobbing */
-@keyframes bob {
-  0% { transform: translateY(0) rotate(-1deg); }
-  50% { transform: translateY(-8px) rotate(1deg); }
-  100% { transform: translateY(0) rotate(-1deg); }
-}
-.floating-bob { animation: bob 6s ease-in-out infinite; transform-origin:center; }
-
-.tabs {
-  display:flex;
-  gap:18px;
-  justify-content:center;
-  margin:26px 0 12px;
-  align-items:center;
-  position:relative;
-  z-index:5;
-}
-.tab-btn{
-  padding:10px 18px;
-  background:transparent;
-  border-radius:30px;
-  font-weight:800;
-  border:2px solid transparent;
-  cursor:pointer;
-  transition: transform .22s ease, color .18s ease;
-  color:var(--muted);
-  font-size:16px;
-  position:relative;
-  z-index:6;
-}
-.tab-btn:hover{ transform: translateY(-3px); }
-.tab-btn.active{
-  color:#111;
-  transform: translateY(-6px);
-}
-
-.tab-indicator{
-  position:absolute;
-  height:52px;
-  width:140px;
-  background: linear-gradient(180deg, rgba(255,204,77,0.14), rgba(255,164,0,0.08));
-  border-radius:28px;
-  left:0;
-  top:0;
-  transform: translateY(6px);
-  transition: left .32s cubic-bezier(.2,.9,.2,1), width .32s, transform .28s;
-  filter: blur(.6px);
-  z-index:4;
-  pointer-events:none;
-  box-shadow: 0 18px 42px rgba(230,164,0,0.08);
-  backdrop-filter: blur(6px);
-  opacity:0.98;
-}
-
-/* main section title */
-.section-big-title{
-  font-size:34px;
-  font-weight:900;
-  text-align:center;
-  margin:14px 0 22px;
-  color:var(--dark);
-}
-
-/* layout split */
-.menu-layout{
-  display:flex;
-  gap:36px;
-  align-items:flex-start;
-  margin-bottom:40px;
-}
-
-/* glassmorphism seblak card */
-.menu-left{ flex:0.95; }
-.seblak-card{
-  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
-  border-radius:20px;
-  padding:20px;
-  box-shadow:var(--card-shadow);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(6px);
-}
-.seblak-img{
-  width:100%;
-  max-height:420px;
-  object-fit:cover;
-  border-radius:14px;
-  display:block;
-  margin-bottom:16px;
-}
-.seblak-title{ font-size:28px; font-weight:900; color:var(--dark); margin:0 0 8px; }
-.seblak-lead{ color:var(--muted); margin:0 0 12px; }
-.base-price{ color:#d43f3f; font-weight:800; margin-bottom:12px; }
-
-/* RIGHT (topping panel) */
-.menu-right{
-  flex:1.15;
-  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.92));
-  padding:22px;
-  border-radius:16px;
-  box-shadow:var(--card-shadow);
-  height:620px;
-  overflow-y:auto;
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(6px);
-}
-
-/* DAFTAR TOPPING heading */
-.menu-right .section-title{
-  font-size:20px;
-  font-weight:800;
-  text-align:center;
-  color:var(--dark);
-  margin-bottom:18px;
-}
-
-/* TOPPING GRID - card styling */
-.topping-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:16px;
-}
-.topping-card{
-  position:relative;
-  background: rgba(255,255,255,0.98);
-  border-radius:14px;
-  padding:12px;
-  text-align:center;
-  box-shadow: 0 12px 34px rgba(13,13,13,.06);
-  transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  border: 1px solid rgba(0,0,0,0.03);
-  transform: translateY(8px);
-  opacity:0;
-  animation: cardEnter .56s cubic-bezier(.2,.9,.2,1) forwards;
-}
-@keyframes cardEnter {
-  to { transform: translateY(0); opacity:1; }
-}
-.topping-card:hover{
-  transform: translateY(-10px);
-  box-shadow: 0 28px 60px rgba(12,12,12,.12);
-}
-.topping-img{
-  width:100%;
-  aspect-ratio: 16/9;
-  object-fit:cover;
-  border-radius:10px;
-  margin-bottom:10px;
-}
-.topping-name{ font-weight:800; font-size:1rem; color:#333; margin-bottom:6px; }
-.topping-price{ color:#d43f3f; font-weight:800; margin-bottom:10px; }
-
-/* add button */
-.btn-add{
-  width:100%;
-  padding:9px 10px;
-  border-radius:10px;
-  border:2px solid var(--gold);
-  background:var(--white);
-  color:var(--gold);
-  font-weight:800;
-  transition:all .12s ease;
-  box-shadow:0 8px 18px rgba(0,0,0,.06);
-}
-.btn-add:hover{ background:var(--gold); color:#111; transform:translateY(-2px); }
-
-/* sold badge */
-.sold-badge{
-  display:inline-block;
-  position:absolute;
-  left:12px;
-  top:12px;
-  background:#c43b3b;
-  color:#fff;
-  padding:6px 10px;
-  border-radius:10px;
-  font-weight:800;
-  font-size:.82rem;
-  box-shadow:0 8px 18px rgba(0,0,0,.12);
-}
-.topping-card.sold { opacity:0.9; pointer-events:none; }
-.topping-card.sold .topping-img { filter:grayscale(100%) brightness(.86); }
-.topping-card.sold .btn-add { display:none; }
-
-/* menu section box */
-.menu-section-box{
-  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.94));
-  padding:28px;
-  border-radius:18px;
-  box-shadow:var(--card-shadow);
-  margin-top:28px;
-  border:1px solid var(--glass-border);
-  backdrop-filter: blur(6px);
-}
-
-.menu-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-  gap:24px;
-  align-items:start;
-}
-
-/* item card */
-.menu-item-card{
-  background: rgba(255,255,255,0.99);
-  border-radius:16px;
-  padding:12px;
-  text-align:center;
-  box-shadow:0 18px 44px rgba(12,12,12,.06);
-  transition: transform .18s ease, box-shadow .18s ease;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  min-height:250px;
-  transform: translateY(10px);
-  opacity:0;
-  animation: cardEnterSmall .56s cubic-bezier(.2,.9,.2,1) forwards;
-}
-@keyframes cardEnterSmall { to { transform: translateY(0); opacity:1; } }
-.menu-item-card:hover{
-  transform:translateY(-10px);
-  box-shadow:0 32px 72px rgba(12,12,12,.12);
-}
-.menu-item-img{
-  width:100%;
-  aspect-ratio:4/3;
-  object-fit:cover;
-  border-radius:12px;
-  margin-bottom:12px;
-}
-.menu-item-name{ font-weight:900; font-size:1.05rem; margin-bottom:8px; color:var(--dark); }
-.menu-item-price{ color:#d43f3f; font-weight:800; margin-bottom:14px; }
-
-/* button Pesan Sekarang */
-.btn-order-now{
-  display:inline-block;
-  width:100%;
-  padding:12px 14px;
-  border-radius:12px;
-  background:linear-gradient(180deg,var(--gold),var(--accent));
-  color:#111;
-  font-weight:900;
-  border:none;
-  cursor:pointer;
-  text-align:center;
-  text-decoration:none;
-  box-shadow:0 18px 40px rgba(250,180,10,.12);
-  margin-top:auto;
-}
-.btn-order-now:hover{ opacity:0.98; transform:translateY(-3px); }
-
-/* hidden */
-.hidden { display:none !important; opacity:0; transform: translateY(6px); }
-
-/* responsive adjustments */
-@media(max-width:1100px){
-  .menu-layout{ flex-direction:column; }
-  .menu-right{ height:auto; max-height:520px; }
-  .seblak-img{ max-height:260px; object-fit:cover; }
-  .menu-grid{ grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
-  .menu-item-img{ aspect-ratio: 4/3; }
-  .tab-indicator{ display:none; } /* hide big indicator on mobile */
-  .hero { margin-top:70px; min-height:300px; }
-  .hero-floating{ top:26px; } /* slightly reduce on small screens */
-}
-
-/* modal qty polish */
-.modal-content.custom-qty { border-radius:12px; overflow:hidden; }
-.modal-header.custom-qty { background:var(--gold); border-bottom:none; }
-#qtyModal .modal-body{ padding:18px 22px; text-align:center; }
-#qtyItemName{ font-weight:800; font-size:1.05rem; margin-bottom:6px; color:var(--dark); }
-#qtyItemPrice{ color:var(--muted); display:block; margin-bottom:10px; }
-.qty-control{ display:flex; align-items:center; justify-content:center; gap:12px; margin:12px 0; }
-.qty-control button{ width:44px; height:44px; border-radius:8px; border:1px solid #ddd; font-weight:800; background:#fff; cursor:pointer; box-shadow:0 6px 14px rgba(0,0,0,.06); }
-.qty-display{ min-width:56px; text-align:center; font-weight:800; font-size:1.05rem; }
-#qtySubtotal{ font-weight:800; color:var(--dark); }
-#qtyForm button{ border-radius:10px; }
-
-/* subtle entrance for whole page */
-@keyframes pageFadeIn { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform: translateY(0);} }
-.container.page-wrapper { animation: pageFadeIn .6s ease both; }
-
-/* scrollbar polish */
-.menu-right::-webkit-scrollbar, .menu-section-box::-webkit-scrollbar { width:12px; }
-.menu-right::-webkit-scrollbar-thumb, .menu-section-box::-webkit-scrollbar-thumb { background:#efefef; border-radius:8px; border:3px solid #fff; }
-
-</style>
-
-<?php
-$heroPathServer = __DIR__ . '/../../assets/img/hero/hero-banner.png';
-$heroPathServerJpg = __DIR__ . '/../../assets/img/hero/hero-banner.jpg';
-$heroUrlPng = 'assets/img/hero/hero-banner.png';
-$heroUrlJpg = 'assets/img/hero/hero-banner.jpg';
-
-// choose best available hero image
-$heroImgUrl = '';
-if (file_exists($heroPathServer)) {
-    $heroImgUrl = $heroUrlPng;
-} elseif (file_exists($heroPathServerJpg)) {
-    $heroImgUrl = $heroUrlJpg;
-}
-?>
-
-<!-- HERO -->
-<section class="hero" role="banner" aria-hidden="false">
-  <?php if(!empty($heroImgUrl)): ?>
-    <img src="<?php echo $heroImgUrl; ?>" alt="Hero banner" class="hero-img" />
-  <?php else: ?>
-    <!-- fallback background gradient if no image -->
-    <div style="width:100%;height:360px;background:linear-gradient(135deg, #fff6e5 0%, #fff 100%);"></div>
-  <?php endif; ?>
-
-  <!-- floating items layer -->
-  <div class="hero-floating" aria-hidden="true">
-    <!-- floating images (positions tuned to avoid header overlap) -->
-    <img class="floating-item floating-bob" src="assets/img/menu/es-teh.jpeg" style="width:120px; left:6%; top:38%; animation-delay:.28s;" alt="">
-    <img class="floating-item floating-bob" src="assets/img/menu/es-jeruk.jpeg" style="width:160px; left:46%; top:14%; animation-delay:.44s;" alt="">
-    <img class="floating-item floating-bob" src="assets/img/menu/kopi.jpeg" style="width:120px; right:8%; top:24%; animation-delay:.6s;" alt="">
-    <img class="floating-item" src="assets/img/menu/kentang-goreng.jpeg" style="width:140px; left:34%; bottom:14%; animation-delay:.72s;" alt="">
-    <img class="floating-item" src="assets/img/menu/tahu-krispi.jpeg" style="width:110px; right:18%; bottom:10%; animation-delay:.86s;" alt="">
-  </div>
-
-  <!-- Empty hero-inner because you requested removal of text and CTAs -->
-  <div class="hero-inner" aria-hidden="true"></div>
-</section>
-
-<div class="container page-wrapper">
-  <div style="position:relative;">
-    <div class="tabs" role="tablist" aria-label="Kategori Menu">
-      <button class="tab-btn active" data-tab="makanan" aria-selected="true" role="tab">Makanan</button>
-      <button class="tab-btn" data-tab="minuman" aria-selected="false" role="tab">Minuman</button>
-      <button class="tab-btn" data-tab="camilan" aria-selected="false" role="tab">Camilan</button>
-    </div>
-    <div class="tab-indicator" id="tabIndicator" aria-hidden="true"></div>
-  </div>
-
-  <div id="tab-makanan" class="tab-panel fade-in" role="tabpanel">
-
-    <div class="section-big-title">Menu Utama</div>
-
-    <div class="menu-layout">
-
-      <!-- LEFT -->
-      <div class="menu-left">
-        <div class="seblak-card">
-          <?php if(!empty($menuMain['gambar'])): ?>
-            <img src="assets/img/menu/<?php echo htmlspecialchars($menuMain['gambar']); ?>" class="seblak-img" alt="<?php echo htmlspecialchars($menuMain['nama_menu']); ?>">
-          <?php else: ?>
-            <div class="seblak-img" style="background:#eee;display:flex;align-items:center;justify-content:center;color:#888;">No Image</div>
-          <?php endif; ?>
-
-          <div class="seblak-title"><?php echo htmlspecialchars($menuMain['nama_menu'] ?? 'Seblak Prasmanan'); ?></div>
-          <p class="seblak-lead"><?php echo htmlspecialchars($menuMain['deskripsi'] ?? 'Seblak prasmanan — pilih topping sesuai selera.'); ?></p>
-          <div class="base-price">Harga Dasar: Rp <?php echo number_format($menuMain['harga_dasar'] ?? 0); ?></div>
-
-          <button class="btn btn-outline-warning mt-2" onclick="document.querySelector('#tab-makanan .menu-right').scrollIntoView({behavior:'smooth'});">
-            Pilih Topping
-          </button>
-        </div>
-      </div>
-
-      <!-- RIGHT -->
-      <div class="menu-right" aria-live="polite" aria-label="Daftar Topping">
-        <div class="section-title">Daftar Topping</div>
-
-        <div class="topping-grid">
-        <?php foreach($toppings as $index => $t):
-            $sold = isset($t['stok']) && intval($t['stok']) <= 0;
-            $class = $sold ? "topping-card sold" : "topping-card";
-            // stagger animation by inline style
-            $delay = 0.06 * ($index % 8);
-        ?>
-          <div class="<?php echo $class; ?>" style="animation-delay: <?php echo $delay; ?>s;">
-            <?php if($sold): ?>
-              <span class="sold-badge">HABIS</span>
-            <?php endif; ?>
-
-            <img src="assets/img/topping/<?php echo htmlspecialchars($t['gambar']); ?>" class="topping-img" alt="<?php echo htmlspecialchars($t['nama_topping']); ?>">
-            <div class="topping-name"><?php echo htmlspecialchars($t['nama_topping']); ?></div>
-            <div class="topping-price">Rp <?php echo number_format($t['harga']); ?></div>
-
-            <?php if($sold): ?>
-              <div style="color:#999;font-weight:700;">Stok habis</div>
-            <?php else: ?>
-              <button class="btn-add openQtyModal"
-                data-id="<?php echo htmlspecialchars($t['id_topping']); ?>"
-                data-name="<?php echo htmlspecialchars($t['nama_topping']); ?>"
-                data-price="<?php echo htmlspecialchars($t['harga']); ?>">
-                + Tambah
-              </button>
-            <?php endif; ?>
-
-          </div>
-        <?php endforeach; ?>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div id="tab-minuman" class="tab-panel hidden" role="tabpanel">
-    <div class="menu-section-box fade-in">
-      <div class="section-big-title">Minuman</div>
-
-      <div class="menu-grid">
-        <?php foreach($drinks as $d): ?>
-          <div class="menu-item-card">
-            <img src="assets/img/menu/<?php echo htmlspecialchars($d['gambar']); ?>" class="menu-item-img" alt="<?php echo htmlspecialchars($d['nama_menu']); ?>">
-            <div>
-              <div class="menu-item-name"><?php echo htmlspecialchars($d['nama_menu']); ?></div>
-              <div class="menu-item-price">Rp <?php echo number_format($d['harga_dasar']); ?></div>
+                        <div class="menu-name"><?= htmlspecialchars($m['nama_menu']) ?></div>
+                        <div class="menu-price">
+                            <?= $m['harga'] ? 'Rp '.number_format($m['harga']) : 'Pilih Topping' ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-
-            <a class="btn-order-now" href="checkout.php?id_produk=<?php echo urlencode($d['id_menu']); ?>&jenis=menu">
-              Pesan Sekarang
-            </a>
-          </div>
         <?php endforeach; ?>
-      </div>
+
     </div>
-  </div>
 
-  <div id="tab-camilan" class="tab-panel hidden" role="tabpanel">
-    <div class="menu-section-box fade-in">
-      <div class="section-big-title">Camilan</div>
+        <!-- Modal Topping Seblak -->
+    <div class="modal fade" id="seblakModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-warning text-dark border-0">
+                    <h4 class="modal-title fw-bold" id="seblakTitle">Pilih Topping</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
 
-      <div class="menu-grid">
-        <?php foreach($snacks as $s): ?>
-          <div class="menu-item-card">
-            <img src="assets/img/menu/<?php echo htmlspecialchars($s['gambar']); ?>" class="menu-item-img" alt="<?php echo htmlspecialchars($s['nama_menu']); ?>">
-            <div>
-              <div class="menu-item-name"><?php echo htmlspecialchars($s['nama_menu']); ?></div>
-              <div class="menu-item-price">Rp <?php echo number_format($s['harga_dasar']); ?></div>
+                <div class="modal-body" id="seblakBody">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-warning" style="width:4rem;height:4rem;"></div>
+                    </div>
+                </div>
+
+                <!-- TOMBOL KERANJANG TETAP DI SINI (di file utama) -->
+                <div class="modal-footer border-0 bg-light rounded-bottom-4">
+                    <div class="w-100 text-center">
+                        <button id="btnTambahKeKeranjang" class="btn btn-success btn-lg px-5 py-3 shadow" disabled>
+                            <i class="bi bi-cart-plus-fill me-2"></i>
+                            <span id="btnText">Tambah ke Keranjang</span>
+                            <span id="btnCount" class="ms-2"></span>
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            <a class="btn-order-now" href="checkout.php?id_produk=<?php echo urlencode($s['id_menu']); ?>&jenis=menu">
-              Pesan Sekarang
-            </a>
-          </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- QUANTITY CONFIRMATION MODAL -->
-<div class="modal fade" id="qtyModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
-    <div class="modal-content custom-qty">
-      <div class="modal-header custom-qty">
-        <h5 class="modal-title fw-bold"><i class="bi bi-basket3"></i> Tambah Topping</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center">
-        <div id="qtyItemName" class="fw-bold mb-1"></div>
-        <div class="text-muted" style="margin-bottom:8px;">Harga: <span id="qtyItemPrice">Rp 0</span></div>
-
-        <div class="qty-control">
-          <button type="button" id="qtyMinus">-</button>
-          <div class="qty-display" id="qtyDisplay">1</div>
-          <button type="button" id="qtyPlus">+</button>
         </div>
-
-        <div class="mb-2">Subtotal: <span id="qtySubtotal" class="fw-bold">Rp 0</span></div>
-
-        <!-- Form submit to add to cart (PRG) -->
-        <form id="qtyForm" method="POST">
-          <input type="hidden" name="add_to_cart" id="qtyFormId" value="">
-          <input type="hidden" name="qty" id="qtyFormQty" value="1">
-          <button type="submit" class="btn btn-warning w-100 fw-bold">Tambah ke Keranjang</button>
-        </form>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- CART MODAL -->
-<div class="modal fade" id="cartModalDialog" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-warning">
-        <h5 class="modal-title fw-bold"><i class="bi bi-cart3"></i> Keranjang</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="cartModalContent">
-        <div class="text-center py-4">Memuat...</div>
-      </div>
+
+    <!-- Modal Keranjang -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title fw-bold">Keranjang Belanja</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="cartBody">Memuat...</div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<?php include __DIR__ . '/../../notuse-file/footer.php'; ?>
+    </div>
 
-<!-- SCRIPTS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- modal menu selain seblak -->
+    <div class="modal fade" id="qtyModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title" id="qtyTitle">Pilih Jumlah</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <form method="POST" action="">
+                    <input type="hidden" name="add_to_cart" id="qtyMenuId">
+                    
+                    <div class="modal-body text-center">
+                        <h6 class="mb-3 text-muted" id="qtyMenuName">Nama Menu</h6>
+                        
+                        <div class="input-group justify-content-center">
+                            <button type="button" class="btn btn-outline-secondary" onclick="updatePlainQty(-1)">-</button>
+                            <input type="number" name="qty" id="plainQtyInput" 
+                                    class="form-control text-center fw-bold" 
+                                    value="1" min="1" style="max-width:80px;"
+                                    onchange="if(this.value < 1) this.value=1;">
+                            <button type="button" class="btn btn-outline-secondary" onclick="updatePlainQty(1)">+</button>
+                        </div>
+                    </div>
 
-<script>
-(function(){
-  const tabs = Array.from(document.querySelectorAll('.tab-btn'));
-  const panels = {
-    makanan: document.getElementById('tab-makanan'),
-    minuman: document.getElementById('tab-minuman'),
-    camilan: document.getElementById('tab-camilan')
-  };
-  const indicator = document.getElementById('tabIndicator');
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">
+                            <i class="bi bi-cart-plus-fill me-2"></i> Tambah ke Keranjang
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-  function updateIndicator(activeBtn){
-    if(!activeBtn || !indicator) return;
-    const rect = activeBtn.getBoundingClientRect();
-    const parentRect = activeBtn.parentElement.getBoundingClientRect();
-    // compute left relative to parent
-    const left = rect.left - parentRect.left + activeBtn.parentElement.scrollLeft;
-    const width = rect.width;
-    // place indicator slightly bigger than button
-    const indicatorLeft = Math.max(left - 10, 6); // small left padding
-    const indicatorWidth = Math.max(width + 20, 120);
-    indicator.style.left = indicatorLeft + 'px';
-    indicator.style.width = indicatorWidth + 'px';
-    // slightly lift indicator when active (visual)
-    indicator.style.transform = 'translateY(6px)';
-    // ensure visible
-    indicator.style.opacity = '1';
-  }
+    <!-- Tombol Keranjang -->
+    <div class="cart-float">
+        <button onclick="openCart()" class="position-relative shadow-lg">
+            <i class="bi bi-cart3"></i>
+            <span class="cart-badge"><?= array_sum($_SESSION['cart'] ?? []) ?></span>
+        </button>
+    </div>  
 
-  function showTab(name){
-    // hide all
-    Object.values(panels).forEach(p => {
-      p.classList.add('hidden');
-      p.classList.remove('fade-in');
-    });
-    // deactivate tabs
-    tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+    <!-- Preloader -->
+    <div id="preloader"></div>
 
-    // show selected
-    const panel = panels[name];
-    if(panel){
-      panel.classList.remove('hidden');
-      void panel.offsetWidth; // reflow
-      panel.classList.add('fade-in');
-      // avoid aggressive scrolling - keep subtle
-      setTimeout(()=> {
-        // scroll only if panel not fully visible
-        const r = panel.getBoundingClientRect();
-        if (r.top < 0 || r.bottom > window.innerHeight) {
-          panel.scrollIntoView({behavior:'smooth', block: 'start'});
-        }
-      }, 60);
-    }
-    // activate button
-    const btn = document.querySelector('.tab-btn[data-tab="'+name+'"]');
-    if(btn){ btn.classList.add('active'); btn.setAttribute('aria-selected','true'); updateIndicator(btn); }
-  }
 
-  // bind tabs
-  tabs.forEach(btn => {
-    btn.addEventListener('click', function(){
-      const tab = this.dataset.tab;
-      showTab(tab);
-    });
-  });
+    <!-- JAVA SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
 
-  // initial indicator position (after DOM ready and small timeout to compute)
-  setTimeout(()=> {
-    const active = document.querySelector('.tab-btn.active');
-    if(active) updateIndicator(active);
-  }, 260);
-
-  // adjust indicator on resize & scroll of the tabs container
-  window.addEventListener('resize', ()=> {
-    const active = document.querySelector('.tab-btn.active');
-    if(active) updateIndicator(active);
-  });
-
-  // default
-  showTab('makanan');
-
-  // Quantity modal logic (unchanged behaviour, improved UI)
-  const qtyModalEl = document.getElementById('qtyModal');
-  const qtyItemName = document.getElementById('qtyItemName');
-  const qtyItemPrice = document.getElementById('qtyItemPrice');
-  const qtyDisplay = document.getElementById('qtyDisplay');
-  const qtySubtotal = document.getElementById('qtySubtotal');
-  const qtyFormId = document.getElementById('qtyFormId');
-  const qtyFormQty = document.getElementById('qtyFormQty');
-  const qtyPlus = document.getElementById('qtyPlus');
-  const qtyMinus = document.getElementById('qtyMinus');
-  let currentPrice = 0;
-  let currentQty = 1;
-
-  let bsQtyModal = new bootstrap.Modal(qtyModalEl, {backdrop:'static', keyboard:true});
-
-  document.querySelectorAll('.openQtyModal').forEach(btn => {
-    btn.addEventListener('click', function(e){
-      e.preventDefault();
-      const id = this.dataset.id;
-      const name = this.dataset.name || 'Item';
-      const price = parseFloat(this.dataset.price) || 0;
-
-      currentQty = 1;
-      currentPrice = price;
-
-      qtyItemName.textContent = name;
-      qtyItemPrice.textContent = formatRp(price);
-      qtyDisplay.textContent = currentQty;
-      qtyFormQty.value = currentQty;
-      qtyFormId.value = id;
-      qtySubtotal.textContent = formatRp(price * currentQty);
-
-      bsQtyModal.show();
-    });
-  });
-
-  qtyPlus && qtyPlus.addEventListener('click', () => {
-    currentQty++;
-    updateQtyUI();
-  });
-  qtyMinus && qtyMinus.addEventListener('click', () => {
-    if (currentQty > 1) currentQty--;
-    updateQtyUI();
-  });
-
-  function updateQtyUI(){
-    qtyDisplay.textContent = currentQty;
-    qtyFormQty.value = currentQty;
-    qtySubtotal.textContent = formatRp(currentQty * currentPrice);
-    qtyDisplay.style.transform = 'scale(1.06)';
-    setTimeout(()=> qtyDisplay.style.transform = 'scale(1)', 160);
-  }
-
-  function formatRp(n){
-    const num = Number(n) || 0;
-    return 'Rp ' + num.toLocaleString('id-ID');
-  }
-
-  // Open cart: fetch modal content then show bootstrap modal
-  window.openCart = function(){
-    const target = document.getElementById('cartModalContent');
-    target.innerHTML = '<div class="text-center py-4">Memuat...</div>';
-    fetch('app/views/cart.php')
-      .then(r => r.text())
-      .then(html => {
-        target.innerHTML = html;
-        var cartModal = new bootstrap.Modal(document.getElementById('cartModalDialog'));
-        cartModal.show();
-
-        // bind delete buttons inside loaded content
-        target.querySelectorAll('.btn-delete-cart').forEach(btn => {
-          btn.addEventListener('click', function(){
-            const id = this.dataset.id;
-            Swal.fire({
-              title:'Hapus item?',
-              icon:'warning',
-              showCancelButton:true,
-              confirmButtonColor:'#d33',
-              confirmButtonText:'Ya, hapus'
-            }).then(res => {
-              if(!res.isConfirmed) return;
-              // submit hidden form to remove
-              const f = document.createElement('form');
-              f.method = 'POST';
-              f.style.display = 'none';
-              f.innerHTML = '<input type="hidden" name="remove_from_cart" value="'+id+'">';
-              document.body.appendChild(f);
-              f.submit();
-            });
-          });
+    const preloader = document.querySelector('#preloader');
+    if (preloader) {
+        window.addEventListener('load', () => {
+        preloader.remove();
         });
-
-      })
-      .catch(err => {
-        console.error(err);
-        Swal.fire({icon:'error', title:'Gagal memuat keranjang'});
-      });
-  };
-
-  // Flash messages from server (PRG)
-  <?php if(isset($_SESSION['flash_add'])): unset($_SESSION['flash_add']); ?>
-  Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Topping ditambahkan ke keranjang', timer: 1000, showConfirmButton: false });
-  <?php endif; ?>
-
-  <?php if(isset($_SESSION['flash_remove'])): unset($_SESSION['flash_remove']); ?>
-  Swal.fire({ icon: 'success', title: 'Dihapus', text: 'Item dihapus dari keranjang', timer: 900, showConfirmButton: false });
-  <?php endif; ?>
-
-  // Small parallax for hero (subtle)
-  const hero = document.querySelector('.hero');
-  if(hero){
-    window.addEventListener('scroll', ()=> {
-      const offset = window.scrollY;
-      hero.style.transform = 'translateY(' + Math.min(offset * 0.02, 18) + 'px)';
-      hero.style.backgroundPosition = 'center ' + (50 - offset * 0.006) + '%';
-    });
-  }
-
-  document.querySelectorAll('.hero-floating .floating-item').forEach((el, i) => {
-    const delay = (i * 120);
-    el.style.animationDelay = (delay/1000) + 's';
-    if(!el.classList.contains('floating-bob')) {
-      el.classList.add('floating-bob');
     }
-  });
 
-})();
-</script>
+    // BARU: Kontrol QTY di Modal Menu Biasa
+    function updatePlainQty(change) {
+        const input = document.getElementById('plainQtyInput');
+        let qty = parseInt(input.value) || 1;
+        
+        qty += change;
+        if (qty < 1) qty = 1;
+
+        input.value = qty;
+    }
+
+    // BARU: Fungsi untuk membuka modal QTY menu biasa
+    let currentQtyModal; // Variabel global untuk modal
+
+    function openQtyModal(id, name) {
+        // Set data di Modal
+        document.getElementById('qtyTitle').textContent = `Pesan ${name}`;
+        document.getElementById('qtyMenuName').textContent = name;
+        document.getElementById('qtyMenuId').value = id;
+        document.getElementById('plainQtyInput').value = 1; // Reset QTY
+        
+        // Tampilkan Modal
+        if (!currentQtyModal) {
+            currentQtyModal = new bootstrap.Modal(document.getElementById('qtyModal'));
+        }
+        currentQtyModal.show();
+    }
+
+    // buka chart
+    function openCart() {
+        fetch('app/views/cart.php')
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById('cartBody').innerHTML = html;
+                new bootstrap.Modal('#cartModal').show();
+            });
+    }
+
+    // Flash message
+    <?php if (isset($_SESSION['flash'])): ?>
+        Swal.fire({icon:'success', title:'Berhasil!', text:'<?= $_SESSION['flash'] ?>', timer:1500, showConfirmButton:false});
+        <?php unset($_SESSION['flash']); ?>
+    <?php endif; ?>
+    </script>
+
+
+    <script>
+    // Data stok dari file topping (dipindah ke sini biar pasti jalan)
+    function updateQty(id, change) {
+        const input   = document.getElementById('qty-' + id);
+        const hidden  = document.getElementById('hidden-qty-' + id);
+        const btn     = document.getElementById('btn-add-' + id);
+
+        if (!input) return; // safety
+
+        let qty = parseInt(input.value)     || 0;
+        qty += change;
+
+        const max = (window.toppingStokData && window.toppingStokData[id] !== null) ? window.toppingStokData[id] : 9999;
+        if (qty > max) qty = max;
+        if (qty < 0) qty = 0;
+
+        input.value = qty;
+        hidden.value = qty;
+        btn.disabled = (qty === 0);
+
+        if (qty > 0) {
+            btn.innerHTML = `<i class="bi bi-cart-check"></i> Tambah ${qty} ke Keranjang`;
+            btn.classList.remove('btn-warning'); btn.classList.add('btn-success');
+        } else {
+            btn.innerHTML = `<i class="bi bi-cart-plus"></i> Tambah ke Keranjang`;
+            btn.classList.remove('btn-success'); btn.classList.add('btn-warning');
+        }
+    }
+
+    function addToCart(id, name, price) {
+        openQtyModal(id, name);
+    }
+
+    // ============================
+    // SYSTEM BARU TOPPING + AJAX
+    // ============================
+
+    // Array topping yang dipilih
+    let selectedToppings = [];
+
+    // Tambah/Kurang topping tombol + dan -
+    document.addEventListener("click", function(e) {
+        if (e.target.classList.contains("btnPlus")) {
+            let id = e.target.dataset.id;
+            let harga = parseInt(e.target.dataset.harga);
+            updateTopping(id, harga, +1);
+        }
+
+        if (e.target.classList.contains("btnMinus")) {
+            let id = e.target.dataset.id;
+            let harga = parseInt(e.target.dataset.harga);
+            updateTopping(id, harga, -1);
+        }
+    });
+
+    // update topping dalam array
+    function updateTopping(id, harga, delta) {
+        let exist = selectedToppings.find(t => t.id == id);
+
+        if (!exist && delta === 1) {
+            selectedToppings.push({ id, qty: 1, harga });
+        } else if (exist) {
+            exist.qty += delta;
+            if (exist.qty <= 0) {
+                selectedToppings = selectedToppings.filter(t => t.id != id);
+            }
+        }
+
+        updateToppingCount();
+        activateAddCartButton();
+    }
+
+    // Update jumlah topping di tombol
+    function updateToppingCount() {
+        const total = selectedToppings.reduce((a,b) => a + b.qty, 0);
+        document.getElementById("btnCount").innerHTML = total ? `(${total})` : "";
+    }
+
+    // Aktifkan tombol setelah pilih topping
+    function activateAddCartButton() {
+        document.getElementById("btnTambahKeKeranjang").disabled = false;
+    }
+
+    // Kirim ke keranjang
+    document.getElementById("btnTambahKeKeranjang").addEventListener("click", function () {
+
+        const menuId = this.dataset.menu;
+        const payload = {
+            id_menu: menuId,
+            qty: 1,
+            topping: selectedToppings
+        };
+
+        fetch("cart.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === "success") {
+                alert("Berhasil masuk keranjang!");
+                selectedToppings = [];
+                updateToppingCount();
+                bootstrap.Modal.getInstance(document.getElementById("seblakModal")).hide();
+            } else {
+                alert("Gagal: " + res.message);
+            }
+        });
+    });
+
+
+    // buka modal seblak
+    function openSeblakModal(menuId, name) {
+        document.getElementById("btnTambahKeKeranjang").dataset.menu = menuId;
+
+        fetch("app/views/ajax/seblak_toppings.php?id_menu=" + menuId)
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById("seblakBody").innerHTML = html;
+                selectedToppings = []; // reset
+                updateToppingCount();
+                new bootstrap.Modal(document.getElementById("seblakModal")).show();
+            });
+    }
+    </script>
+
+
+    <!-- include footer.php -->
+    <?php include 'app/views/sections/footer.php'; ?>
+
+    <style>
+    :root { --gold:#ffca28; --red:#d43f3f; --dark:#222; }
+    body { background:#fff; font-family:'Helvetica Neue',Arial,sans-serif; }
+    .container { max-width:1380px; padding:0 20px; }
+        
+    /* Judul Kategori */
+    .cat-title {
+        font-size: 2.8rem; font-weight:900; text-align:center; 
+        margin: 80px 0 50px; color:var(--dark); position:relative;
+    }
+    .cat-title::after {
+        content:''; width:120px; height:6px; background:var(--gold); 
+        position:absolute; bottom:-15px; left:50%; transform:translateX(-50%); border-radius:3px;
+    }
+
+    /* Grid Menu */
+    .menu-grid {
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 50px 30px;
+        padding: 20px 0;
+    }
+    .menu-item {
+        text-align:center; cursor:pointer; transition:all .3s ease;
+        padding:20px; border-radius:16px;
+    }
+    .menu-item:hover { 
+        transform: translateY(-12px) scale(1.04); 
+        background:#fff; box-shadow:0 20px 40px rgba(0,0,0,.1);
+    }
+    .menu-item img {
+        width:100%; height:240px; object-fit:contain; 
+        filter:drop-shadow(0 15px 25px rgba(0,0,0,.15));
+        background:transparent;
+    }
+    .menu-name {
+        font-size:1.4rem; font-weight:800; margin:16px 0 6px; color:var(--dark);
+    }
+    .menu-price {
+        font-size:1.45rem; font-weight:900; color:var(--red);
+    }
+
+    /* Badge BARU */
+    .badge-new {
+        position:absolute; top:10px; left:50%; transform:translateX(-50%);
+        background:#ff3b30; color:white; padding:6px 18px; border-radius:20px;
+        font-size:0.8rem; font-weight:bold; z-index:10;
+    }
+
+    /* Tombol Keranjang */
+    .cart-float {
+        position:fixed; bottom:30px; right:30px; z-index:9999;
+    }
+    .cart-float button {
+        width:72px; height:72px; border-radius:50%; background:var(--gold);
+        border:none; font-size:2.2rem; color:#111; box-shadow:0 12px 35px rgba(0,0,0,.3);
+    }
+    .cart-badge {
+        position:absolute; top:-10px; right:-10px; background:#d32f2f;
+        color:white; font-size:0.85rem; min-width:28px; height:28px;
+        border-radius:50%; display:flex; align-items:center; justify-content:center;
+    }
+    </style>

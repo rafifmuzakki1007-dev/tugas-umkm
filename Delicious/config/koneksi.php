@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "umkm1";
+$db   = "db_seblak";
 
 try {
     $koneksi = new PDO(

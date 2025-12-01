@@ -167,8 +167,8 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
       </div>
 
       <div style="display:flex;align-items:center;gap:12px;">
-        <div style="font-weight:700;color:var(--muted)">Total</div>
-        <div style="font-weight:900">Rp <?= number_format($cartTotal,0,',','.') ?></div>
+        <!-- <div style="font-weight:700;color:var(--muted)">Total</div>
+        <div style="font-weight:900">Rp <?= number_format($cartTotal,0,',','.') ?></div> -->
         <button id="closeCheckoutBtn" style="background:none;border:0;font-size:22px;cursor:pointer" aria-label="Tutup checkout">✕</button>
       </div>
     </div>
