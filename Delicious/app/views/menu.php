@@ -1,3 +1,5 @@
+<title>Menu | Seblak Say Cafe</title>
+
 <?php  
 if (session_status() === PHP_SESSION_NONE) session_start();
 
@@ -34,13 +36,92 @@ if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ADD to cart (topping flow)
+    
+
+/* ======= HANDLE POST (PRG) ======= */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // ADD to cart (topping/menu unified)
     if (isset($_POST['add_to_cart'])) {
-        $id = trim($_POST['add_to_cart']);
-        $qty = isset($_POST['qty']) ? max(1, intval($_POST['qty'])) : 1;
-        if ($id !== '') {
-            $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + $qty;
-            $_SESSION['flash_add'] = true;
+        $rawId = trim($_POST['add_to_cart']);
+        $qty = (int)($_POST['qty'] ?? 1);
+        if ($qty < 1) $qty = 1;
+
+        // decide lookup id and type (topping if prefixed letter(s))
+        $isTopping = false;
+        if (preg_match('/^[A-Za-z]/', $rawId)) {
+            $isTopping = true;
+            $lookupId = preg_replace('/^[A-Za-z]+/', '', $rawId);
+        } else {
+            $lookupId = $rawId;
         }
+
+        $item = null;
+        try {
+            if ($isTopping) {
+                $stmt = $koneksi->prepare("SELECT id_topping, nama_topping, harga, gambar FROM topping WHERE id_topping = :id");
+                $stmt->execute([':id' => $lookupId]);
+                $t = $stmt->fetch();
+                if ($t) {
+                    $item = [
+                        'id' => $rawId,
+                        'nama' => $t['nama_topping'],
+                        'harga' => isset($t['harga']) ? (int)$t['harga'] : 0,
+                        'qty' => $qty,
+                        'gambar' => $t['gambar'] ?? ''
+                    ];
+                }
+            }
+
+            if (!$item) {
+                $stmt = $koneksi->prepare("SELECT id_menu, nama_menu, harga_dasar, gambar FROM menu WHERE id_menu = :id");
+                $stmt->execute([':id' => $lookupId]);
+                $mRow = $stmt->fetch();
+                if ($mRow) {
+                    $item = [
+                        'id' => $rawId,
+                        'nama' => $mRow['nama_menu'],
+                        'harga' => isset($mRow['harga_dasar']) ? (int)$mRow['harga_dasar'] : 0,
+                        'qty' => $qty,
+                        'gambar' => $mRow['gambar'] ?? ''
+                    ];
+                }
+            }
+        } catch (PDOException $e) {
+            // log or set flash error (non-fatal)
+            $_SESSION['flash_add_failed'] = "DB error when adding: " . $e->getMessage();
+            $item = null;
+        }
+
+        if ($item) {
+            if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) $_SESSION['cart'] = [];
+            if (isset($_SESSION['cart'][$item['id']])) {
+                $_SESSION['cart'][$item['id']]['qty'] += $item['qty'];
+            } else {
+                $_SESSION['cart'][$item['id']] = $item;
+            }
+            $_SESSION['flash_add'] = true;
+        } else {
+            // optional: set flash to inform item not found
+            if (!isset($_SESSION['flash_add_failed'])) $_SESSION['flash_add_failed'] = 'Item tidak ditemukan.';
+        }
+    }
+
+    // REMOVE from cart
+    if (isset($_POST['remove_from_cart'])) {
+        $id = trim($_POST['remove_from_cart']);
+        if ($id !== '' && isset($_SESSION['cart'][$id])) {
+            unset($_SESSION['cart'][$id]);
+            $_SESSION['flash_remove'] = true;
+        }
+    }
+
+    // PRG redirect to avoid resubmission
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+
         header("Location: " . $_SERVER['REQUEST_URI']);
         exit;
     }
@@ -55,7 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: " . $_SERVER['REQUEST_URI']);
         exit;
     }
-}
 
 // include header
 include 'app/views/sections/header_nav.php';
@@ -77,7 +157,6 @@ include 'app/views/sections/header_nav.php';
 }
 
 /* PAGE */
-/* page-wrapper margin reduced because hero now has its own offset */
 .page-wrapper{
   margin-top:40px !important;
   padding-bottom:100px;
@@ -89,14 +168,11 @@ include 'app/views/sections/header_nav.php';
     margin-top: 78px;
     margin-bottom: auto;
     background-image: url('assets/img/hero/hero-banner.png');
-    background-size: contain !important;  /* FULL TANPA TERPOTONG */
+    background-size: contain !important;
     background-repeat: no-repeat !important;
     background-position: center center !important;
-    background-color: #111; /* fallback warna gelap */
-    
-    /* tinggi hero dibuat presisi mirip McD */
-    height: 390px;      
-    
+    background-color: #111;
+    height: 390px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -110,7 +186,7 @@ include 'app/views/sections/header_nav.php';
   display:block;
   object-fit: cover;
   -o-object-fit: cover;
-  max-height: 720px; 
+  max-height: 720px;
 }
 
 .hero::after{
@@ -164,7 +240,6 @@ include 'app/views/sections/header_nav.php';
 @keyframes floatIn {
   to { opacity:1; transform: translateY(0) scale(1); }
 }
-/* gentle bobbing */
 @keyframes bob {
   0% { transform: translateY(0) rotate(-1deg); }
   50% { transform: translateY(-8px) rotate(1deg); }
@@ -427,9 +502,9 @@ include 'app/views/sections/header_nav.php';
   .seblak-img{ max-height:260px; object-fit:cover; }
   .menu-grid{ grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
   .menu-item-img{ aspect-ratio: 4/3; }
-  .tab-indicator{ display:none; } /* hide big indicator on mobile */
+  .tab-indicator{ display:none; }
   .hero { margin-top:70px; min-height:300px; }
-  .hero-floating{ top:26px; } /* slightly reduce on small screens */
+  .hero-floating{ top:26px; }
 }
 
 /* modal qty polish */
@@ -452,6 +527,170 @@ include 'app/views/sections/header_nav.php';
 .menu-right::-webkit-scrollbar, .menu-section-box::-webkit-scrollbar { width:12px; }
 .menu-right::-webkit-scrollbar-thumb, .menu-section-box::-webkit-scrollbar-thumb { background:#efefef; border-radius:8px; border:3px solid #fff; }
 
+/* === McD-style layout overrides: show all categories stacked and simplify topping layout === */
+.tabs{ display:none !important; }
+.tab-indicator{ display:none !important; }
+
+/* Make layout vertical so left and right stack */
+.menu-layout{ flex-direction: column; gap: 28px; }
+.menu-left{ flex: unset; width:100% !important; }
+.menu-right{ flex: unset; width:100% !important; margin-top: 24px; box-shadow:none; background:transparent; border:none; padding:0; }
+
+/* Topping cards simplified to clean grid (no heavy cards) */
+.topping-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:18px; }
+.topping-card{ background: transparent; box-shadow: none; border-radius:12px; padding:10px; display:flex; flex-direction:column; align-items:center; gap:8px; border:1px solid rgba(0,0,0,0.04); }
+.topping-card img{ width:100%; height:95px; object-fit:cover; border-radius:10px; }
+.topping-card .topping-name{ font-weight:700; color:var(--dark); text-align:center; }
+.topping-card .topping-price{ color:#d43f3f; font-weight:800; margin-top:4px; }
+
+/* Menu item cards larger and simple */
+.menu-grid{ grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:36px; }
+.menu-item-card{ background: transparent; box-shadow:none; border-radius:12px; padding:8px; text-align:center; }
+.menu-item-card img{ width:160px; height:140px; object-fit:contain; margin:0 auto 12px; }
+
+/* Center the main title like McD */
+.section-big-title{ font-size:44px; font-weight:900; text-align:center; margin:28px 0 24px; color:var(--dark); }
+
+/* Ensure buttons are visible and simple */
+.btn-order-now{ background:transparent; border:2px solid var(--gold); color:var(--gold); padding:8px 12px; border-radius:8px; font-weight:700; text-decoration:none; }
+
+/* Small screens: maintain single column */
+@media (max-width: 900px){
+  .menu-grid, .topping-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .topping-card img{ height:86px; }
+  .section-big-title{ font-size:32px; }
+}
+
+/* === Seblak Hero Redesign === */
+.seblak-card{
+  max-width:900px !important;
+  margin:0 auto 40px auto !important;
+  padding:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  border:none !important;
+}
+.seblak-img{
+  width:100% !important;
+  height:320px !important;
+  object-fit:cover !important;
+  border-radius:22px !important;
+  display:block;
+}
+.seblak-title, .seblak-lead{
+  padding-left:8px;
+}
+
+/* === Remove background card on Minuman & Camilan sections === */
+#tab-minuman .menu-section-box, 
+#tab-camilan .menu-section-box{
+  background:transparent !important;
+  box-shadow:none !important;
+  border:none !important;
+  padding:0 !important;
+}
+
+/* hover animation for product cards */
+.menu-item-card:hover img{
+  transform:scale(1.06);
+  transition:0.25s ease;
+}
+.menu-item-card img{
+  transition:0.25s ease;
+}
+
+/* Fix Seblak Card */
+.seblak-card{
+  background: #ffffff !important;
+  padding:20px !important;
+  border-radius:20px !important;
+  box-shadow:0 4px 20px rgba(0,0,0,0.08) !important;
+  max-width:900px !important;
+  margin:0 auto 40px auto !important;
+}
+.seblak-img{
+  width:100% !important;
+  height:300px !important;
+  object-fit:cover !important;
+  border-radius:18px !important;
+}
+
+/* Remove background card from Minuman & Camilan */
+#tab-minuman, #tab-camilan{
+  background:transparent !important;
+  box-shadow:none !important;
+  border:none !important;
+}
+
+/* Topping Grid 4 columns */
+.topping-grid{
+  display:grid !important;
+  grid-template-columns: repeat(4,1fr) !important;
+  gap:18px !important;
+}
+
+/* Force show panels */
+#tab-makanan, #tab-minuman, #tab-camilan{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+/* --- HERO SEBLAK PREMIUM --- */
+.seblak-card{
+  max-width:560px !important;
+  margin:0 auto 50px auto !important;
+  padding:22px !important;
+  background:white !important;
+  border-radius:22px !important;
+  box-shadow:0 6px 22px rgba(0,0,0,0.06) !important;
+}
+.seblak-img{
+  width:100% !important;
+  height:270px !important;
+  object-fit:cover !important;
+  border-radius:20px !important;
+}
+
+/* --- TOPPING GRID SMALLER --- */
+.topping-grid{
+  display:grid !important;
+  grid-template-columns:repeat(4,1fr) !important;
+  gap:12px !important;
+}
+.topping-grid img{
+  height:100px !important;
+  object-fit:cover !important;
+  border-radius:12px !important;
+}
+.topping-grid .menu-item-card{
+  padding:12px !important;
+}
+
+/* --- MINUMAN & CAMILAN CARD STYLE --- */
+.menu-item-card{
+  background:white !important;
+  padding:18px !important;
+  border-radius:20px !important;
+  box-shadow:0 4px 14px rgba(0,0,0,0.06) !important;
+}
+
+/* --- HOVER BUTTON ANIMATION YELLOW --- */
+.menu-item-card button{
+  transition:0.25s ease !important;
+}
+.menu-item-card button:hover{
+  background:#ffcc00 !important;
+  border-color:#ffcc00 !important;
+  color:black !important;
+}
+
+/* FORCE SHOW PANELS */
+#tab-makanan, #tab-minuman, #tab-camilan{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
 </style>
 
 <?php
@@ -460,7 +699,6 @@ $heroPathServerJpg = __DIR__ . '/../../assets/img/hero/hero-banner.jpg';
 $heroUrlPng = 'assets/img/hero/hero-banner.png';
 $heroUrlJpg = 'assets/img/hero/hero-banner.jpg';
 
-// choose best available hero image
 $heroImgUrl = '';
 if (file_exists($heroPathServer)) {
     $heroImgUrl = $heroUrlPng;
@@ -474,13 +712,10 @@ if (file_exists($heroPathServer)) {
   <?php if(!empty($heroImgUrl)): ?>
     <img src="<?php echo $heroImgUrl; ?>" alt="Hero banner" class="hero-img" />
   <?php else: ?>
-    <!-- fallback background gradient if no image -->
     <div style="width:100%;height:360px;background:linear-gradient(135deg, #fff6e5 0%, #fff 100%);"></div>
   <?php endif; ?>
 
-  <!-- floating items layer -->
   <div class="hero-floating" aria-hidden="true">
-    <!-- floating images (positions tuned to avoid header overlap) -->
     <img class="floating-item floating-bob" src="assets/img/menu/es-teh.jpeg" style="width:120px; left:6%; top:38%; animation-delay:.28s;" alt="">
     <img class="floating-item floating-bob" src="assets/img/menu/es-jeruk.jpeg" style="width:160px; left:46%; top:14%; animation-delay:.44s;" alt="">
     <img class="floating-item floating-bob" src="assets/img/menu/kopi.jpeg" style="width:120px; right:8%; top:24%; animation-delay:.6s;" alt="">
@@ -488,7 +723,6 @@ if (file_exists($heroPathServer)) {
     <img class="floating-item" src="assets/img/menu/tahu-krispi.jpeg" style="width:110px; right:18%; bottom:10%; animation-delay:.86s;" alt="">
   </div>
 
-  <!-- Empty hero-inner because you requested removal of text and CTAs -->
   <div class="hero-inner" aria-hidden="true"></div>
 </section>
 
@@ -504,7 +738,7 @@ if (file_exists($heroPathServer)) {
 
   <div id="tab-makanan" class="tab-panel fade-in" role="tabpanel">
 
-    <div class="section-big-title">Menu Utama</div>
+    <div class="section-big-title">Menu</div>
 
     <div class="menu-layout">
 
@@ -519,11 +753,9 @@ if (file_exists($heroPathServer)) {
 
           <div class="seblak-title"><?php echo htmlspecialchars($menuMain['nama_menu'] ?? 'Seblak Prasmanan'); ?></div>
           <p class="seblak-lead"><?php echo htmlspecialchars($menuMain['deskripsi'] ?? 'Seblak prasmanan — pilih topping sesuai selera.'); ?></p>
-          <div class="base-price">Harga Dasar: Rp <?php echo number_format($menuMain['harga_dasar'] ?? 0); ?></div>
 
-          <button class="btn btn-outline-warning mt-2" onclick="document.querySelector('#tab-makanan .menu-right').scrollIntoView({behavior:'smooth'});">
-            Pilih Topping
-          </button>
+          <!-- Pilih Topping removed as requested -->
+
         </div>
       </div>
 
@@ -535,7 +767,6 @@ if (file_exists($heroPathServer)) {
         <?php foreach($toppings as $index => $t):
             $sold = isset($t['stok']) && intval($t['stok']) <= 0;
             $class = $sold ? "topping-card sold" : "topping-card";
-            // stagger animation by inline style
             $delay = 0.06 * ($index % 8);
         ?>
           <div class="<?php echo $class; ?>" style="animation-delay: <?php echo $delay; ?>s;">
@@ -551,7 +782,7 @@ if (file_exists($heroPathServer)) {
               <div style="color:#999;font-weight:700;">Stok habis</div>
             <?php else: ?>
               <button class="btn-add openQtyModal"
-                data-id="<?php echo htmlspecialchars($t['id_topping']); ?>"
+                data-id="<?php echo htmlspecialchars('T'.$t['id_topping']); ?>"
                 data-name="<?php echo htmlspecialchars($t['nama_topping']); ?>"
                 data-price="<?php echo htmlspecialchars($t['harga']); ?>">
                 + Tambah
@@ -566,7 +797,7 @@ if (file_exists($heroPathServer)) {
     </div>
   </div>
 
-  <div id="tab-minuman" class="tab-panel hidden" role="tabpanel">
+  <div id="tab-minuman" class="tab-panel fade-in" role="tabpanel">
     <div class="menu-section-box fade-in">
       <div class="section-big-title">Minuman</div>
 
@@ -579,16 +810,20 @@ if (file_exists($heroPathServer)) {
               <div class="menu-item-price">Rp <?php echo number_format($d['harga_dasar']); ?></div>
             </div>
 
-            <a class="btn-order-now" href="checkout.php?id_produk=<?php echo urlencode($d['id_menu']); ?>&jenis=menu">
-              Pesan Sekarang
-            </a>
+            <!-- Convert to + Tambah that opens qty modal and adds to cart -->
+            <button class="btn-add openQtyModal"
+              data-id="<?php echo htmlspecialchars('M'.$d['id_menu']); ?>"
+              data-name="<?php echo htmlspecialchars($d['nama_menu']); ?>"
+              data-price="<?php echo htmlspecialchars($d['harga_dasar']); ?>">
+              + Tambah
+            </button>
           </div>
         <?php endforeach; ?>
       </div>
     </div>
   </div>
 
-  <div id="tab-camilan" class="tab-panel hidden" role="tabpanel">
+  <div id="tab-camilan" class="tab-panel fade-in" role="tabpanel">
     <div class="menu-section-box fade-in">
       <div class="section-big-title">Camilan</div>
 
@@ -601,9 +836,12 @@ if (file_exists($heroPathServer)) {
               <div class="menu-item-price">Rp <?php echo number_format($s['harga_dasar']); ?></div>
             </div>
 
-            <a class="btn-order-now" href="checkout.php?id_produk=<?php echo urlencode($s['id_menu']); ?>&jenis=menu">
-              Pesan Sekarang
-            </a>
+            <button class="btn-add openQtyModal"
+              data-id="<?php echo htmlspecialchars('S'.$s['id_menu']); ?>"
+              data-name="<?php echo htmlspecialchars($s['nama_menu']); ?>"
+              data-price="<?php echo htmlspecialchars($s['harga_dasar']); ?>">
+              + Tambah
+            </button>
           </div>
         <?php endforeach; ?>
       </div>
@@ -617,7 +855,7 @@ if (file_exists($heroPathServer)) {
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content custom-qty">
       <div class="modal-header custom-qty">
-        <h5 class="modal-title fw-bold"><i class="bi bi-basket3"></i> Tambah Topping</h5>
+        <h5 class="modal-title fw-bold"><i class="bi bi-basket3"></i> Tambah Item</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body text-center">
@@ -678,50 +916,39 @@ if (file_exists($heroPathServer)) {
     if(!activeBtn || !indicator) return;
     const rect = activeBtn.getBoundingClientRect();
     const parentRect = activeBtn.parentElement.getBoundingClientRect();
-    // compute left relative to parent
     const left = rect.left - parentRect.left + activeBtn.parentElement.scrollLeft;
     const width = rect.width;
-    // place indicator slightly bigger than button
-    const indicatorLeft = Math.max(left - 10, 6); // small left padding
+    const indicatorLeft = Math.max(left - 10, 6);
     const indicatorWidth = Math.max(width + 20, 120);
     indicator.style.left = indicatorLeft + 'px';
     indicator.style.width = indicatorWidth + 'px';
-    // slightly lift indicator when active (visual)
     indicator.style.transform = 'translateY(6px)';
-    // ensure visible
     indicator.style.opacity = '1';
   }
 
   function showTab(name){
-    // hide all
     Object.values(panels).forEach(p => {
       p.classList.add('hidden');
       p.classList.remove('fade-in');
     });
-    // deactivate tabs
     tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
 
-    // show selected
     const panel = panels[name];
     if(panel){
       panel.classList.remove('hidden');
-      void panel.offsetWidth; // reflow
+      void panel.offsetWidth;
       panel.classList.add('fade-in');
-      // avoid aggressive scrolling - keep subtle
       setTimeout(()=> {
-        // scroll only if panel not fully visible
         const r = panel.getBoundingClientRect();
         if (r.top < 0 || r.bottom > window.innerHeight) {
           panel.scrollIntoView({behavior:'smooth', block: 'start'});
         }
       }, 60);
     }
-    // activate button
     const btn = document.querySelector('.tab-btn[data-tab="'+name+'"]');
     if(btn){ btn.classList.add('active'); btn.setAttribute('aria-selected','true'); updateIndicator(btn); }
   }
 
-  // bind tabs
   tabs.forEach(btn => {
     btn.addEventListener('click', function(){
       const tab = this.dataset.tab;
@@ -729,22 +956,19 @@ if (file_exists($heroPathServer)) {
     });
   });
 
-  // initial indicator position (after DOM ready and small timeout to compute)
   setTimeout(()=> {
     const active = document.querySelector('.tab-btn.active');
     if(active) updateIndicator(active);
   }, 260);
 
-  // adjust indicator on resize & scroll of the tabs container
   window.addEventListener('resize', ()=> {
     const active = document.querySelector('.tab-btn.active');
     if(active) updateIndicator(active);
   });
 
-  // default
   showTab('makanan');
 
-  // Quantity modal logic (unchanged behaviour, improved UI)
+  // Quantity modal logic (works for toppings, drinks, snacks now)
   const qtyModalEl = document.getElementById('qtyModal');
   const qtyItemName = document.getElementById('qtyItemName');
   const qtyItemPrice = document.getElementById('qtyItemPrice');
@@ -813,7 +1037,6 @@ if (file_exists($heroPathServer)) {
         var cartModal = new bootstrap.Modal(document.getElementById('cartModalDialog'));
         cartModal.show();
 
-        // bind delete buttons inside loaded content
         target.querySelectorAll('.btn-delete-cart').forEach(btn => {
           btn.addEventListener('click', function(){
             const id = this.dataset.id;
@@ -825,7 +1048,6 @@ if (file_exists($heroPathServer)) {
               confirmButtonText:'Ya, hapus'
             }).then(res => {
               if(!res.isConfirmed) return;
-              // submit hidden form to remove
               const f = document.createElement('form');
               f.method = 'POST';
               f.style.display = 'none';
@@ -845,14 +1067,14 @@ if (file_exists($heroPathServer)) {
 
   // Flash messages from server (PRG)
   <?php if(isset($_SESSION['flash_add'])): unset($_SESSION['flash_add']); ?>
-  Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Topping ditambahkan ke keranjang', timer: 1000, showConfirmButton: false });
+  Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Item ditambahkan ke keranjang', timer: 1000, showConfirmButton: false });
   <?php endif; ?>
 
   <?php if(isset($_SESSION['flash_remove'])): unset($_SESSION['flash_remove']); ?>
   Swal.fire({ icon: 'success', title: 'Dihapus', text: 'Item dihapus dari keranjang', timer: 900, showConfirmButton: false });
   <?php endif; ?>
 
-  // Small parallax for hero (subtle)
+  // Small parallax for hero
   const hero = document.querySelector('.hero');
   if(hero){
     window.addEventListener('scroll', ()=> {

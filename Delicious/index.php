@@ -1,5 +1,6 @@
-<?php  
-// index.php — FULL FINAL FIX
+<?php
+// index.php — FINAL CLEAN FIX
+
 ob_start();
 if (session_status() === PHP_SESSION_NONE)
     session_start();
@@ -18,37 +19,36 @@ $karyawans = $karyawanModel->getAllKaryawan() ?? [];
 $page = isset($_GET['page']) ? strtolower($_GET['page']) : 'home';
 
 /* =====================================================
-   DETEKSI AJAX (dipakai agar kita tdk mengekspor HTML/JS
-   saat meng-handle request AJAX seperti pesan_process)
+   DETEKSI AJAX
 ===================================================== */
 $isAjax = false;
 if (
-    isset($_POST['from_ajax']) && $_POST['from_ajax'] == '1'
-    || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+    (isset($_POST['from_ajax']) && $_POST['from_ajax'] == '1')
+    || (isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+        && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
 ) {
     $isAjax = true;
 }
 
 /* =====================================================
-   GLOBAL FIX — HAPUS BACKDROP (only on normal page loads)
-   Jangan cetak ini ketika request AJAX (mengacaukan JSON)
+   HAPUS BACKDROP
 ===================================================== */
 if (!$isAjax) {
     echo "<script>
-    document.addEventListener('DOMContentLoaded', function(){
-        document.querySelectorAll('.modal-backdrop').forEach(x => x.remove());
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-    });
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('.modal-backdrop').forEach(x => x.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+        });
     </script>";
 }
 
 /* =====================================================
-   pesan_process via AJAX ONLY
+   pesan_process (AJAX ONLY)
 ===================================================== */
 if ($page === 'pesan_process') {
     if (!empty($_POST['from_ajax']) || $isAjax) {
-        include "app/controllers/pesan_process.php";
+        include 'app/controllers/pesan_process.php';
         exit;
     }
 }
@@ -64,7 +64,7 @@ if (isset($_GET['do_logout'])) {
 }
 
 /* =====================================================
-   ADMIN ROUTES
+   ADMIN PAGES
 ===================================================== */
 $admin_pages = ['dashboard','menu_admin','transaksi_admin','profile_admin'];
 
@@ -78,7 +78,7 @@ if (in_array($page, $admin_pages)) {
 }
 
 /* =====================================================
-   PUBLIC ROUTES
+   PUBLIC ROUTING
 ===================================================== */
 switch ($page) {
 
@@ -109,9 +109,6 @@ switch ($page) {
         include "app/views/checkout.php";
         break;
 
-    /* ======================================================
-       MODE /checkout → tampilkan menu + buka drawer manual
-    ====================================================== */
     case 'checkout':
         $menus = $menuModel->getAllMenu();
         include "app/views/menu.php";

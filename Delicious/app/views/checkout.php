@@ -1,4 +1,6 @@
-<?php   
+<?php
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../../config/koneksi.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../../config/koneksi.php';
 
@@ -6,7 +8,10 @@ require_once __DIR__ . '/../../config/koneksi.php';
   Perubahan penting:
   - Ambil data menu dasar (MN001) dan masukkan sebagai item pertama
     dengan harga 0 (seblak).
-  - Tetap menampilkan topping dari session cart.
+  - Perbaikan: deteksi ID yang tersimpan di $_SESSION['cart'] sehingga
+    dapat menampilkan topping, minuman, dan camilan meskipun key
+    memiliki prefix (mis. T123, M45, S67, or menu-45/snack-67).
+  - Tidak merubah struktur HTML/JS asli—hanya memperbaiki logika backend.
 */
 
 $cartItems = [];
@@ -35,16 +40,101 @@ if ($baseMenu) {
     ];
 }
 
+/**
+ * Fetch cart item by stored session key.
+ * Supports keys like:
+ *  - "T123" -> topping id 123
+ *  - "M45"  -> menu id 45 (minuman)
+ *  - "S67"  -> snack id 67 (camilan)
+ *  - "topping-123", "menu-45", "snack-67"
+ *  - numeric ids => will try topping first, then menu
+ *
+ * Returns array with keys: id, name (nama_topping/nama_menu), harga, gambar, jenis ('topping'|'menu')
+ * or null if not found.
+ */
+function resolveCartKey($pdo, $key) {
+    $k = trim((string)$key);
+    if ($k === '') return null;
+
+    // prefixed single-letter like T/M/S
+    $first = strtoupper(substr($k,0,1));
+    if (in_array($first, ['T','M','S'])) {
+        $raw = substr($k,1);
+        // numeric id expected
+        if ($first === 'T') {
+            $stmt = $pdo->prepare("SELECT id_topping AS id, nama_topping AS name, harga, gambar FROM topping WHERE id_topping = :id LIMIT 1");
+            $stmt->execute([':id' => $raw]);
+            $r = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($r) { $r['jenis']='topping'; return $r; }
+        } else {
+            // M or S -> menu table
+            $stmt = $pdo->prepare("SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar FROM menu WHERE id_menu = :id LIMIT 1");
+            $stmt->execute([':id' => $raw]);
+            $r = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($r) { $r['jenis']='menu'; return $r; }
+        }
+    }
+
+    // prefixed like "menu-123" or "snack-45" or "topping-12"
+    if (strpos($k,'-') !== false) {
+        list($pref,$raw) = explode('-', $k, 2);
+        $pref = strtolower($pref);
+        if ($pref === 'topping') {
+            $stmt = $pdo->prepare("SELECT id_topping AS id, nama_topping AS name, harga, gambar FROM topping WHERE id_topping = :id LIMIT 1");
+            $stmt->execute([':id' => $raw]);
+            $r = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($r) { $r['jenis']='topping'; return $r; }
+        } else { // menu/snack/menu etc -> menu table
+            $stmt = $pdo->prepare("SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar FROM menu WHERE id_menu = :id LIMIT 1");
+            $stmt->execute([':id' => $raw]);
+            $r = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($r) { $r['jenis']='menu'; return $r; }
+        }
+    }
+
+    // fallback: numeric id -> try topping first, then menu
+    if (ctype_digit($k)) {
+        $stmt = $pdo->prepare("SELECT id_topping AS id, nama_topping AS name, harga, gambar FROM topping WHERE id_topping = :id LIMIT 1");
+        $stmt->execute([':id' => $k]);
+        $r = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($r) { $r['jenis']='topping'; return $r; }
+
+        $stmt = $pdo->prepare("SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar FROM menu WHERE id_menu = :id LIMIT 1");
+        $stmt->execute([':id' => $k]);
+        $r = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($r) { $r['jenis']='menu'; return $r; }
+    }
+
+    // if nothing matched, try to search both tables by id-like string (last resort)
+    $stmt = $pdo->prepare("SELECT id_topping AS id, nama_topping AS name, harga, gambar FROM topping WHERE id_topping = :id LIMIT 1");
+    $stmt->execute([':id' => $k]);
+    $r = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($r) { $r['jenis']='topping'; return $r; }
+    $stmt = $pdo->prepare("SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar FROM menu WHERE id_menu = :id LIMIT 1");
+    $stmt->execute([':id' => $k]);
+    $r = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($r) { $r['jenis']='menu'; return $r; }
+
+    return null;
+}
+
 if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $tid => $q) {
-        $stmt = $koneksi->prepare("SELECT id_topping, nama_topping, harga, gambar FROM topping WHERE id_topping = :id");
-        $stmt->execute([':id' => $tid]);
-        $r = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$r) continue;
-        $r['qty'] = intval($q);
-        $r['subtotal'] = $r['qty'] * floatval($r['harga']);
-        $cartItems[] = $r;
-        $cartTotal += $r['subtotal'];
+        $resolved = resolveCartKey($koneksi, $tid);
+        if (!$resolved) continue;
+        $resolved['qty'] = intval($q);
+        $resolved['subtotal'] = $resolved['qty'] * floatval($resolved['harga']);
+        // map to original keys expected by template (nama_topping used previously)
+        $cartItems[] = [
+            'id' => $resolved['id'],
+            'is_base' => false,
+            'nama_topping' => $resolved['name'],
+            'gambar' => $resolved['gambar'],
+            'qty' => $resolved['qty'],
+            'harga' => $resolved['harga'],
+            'subtotal' => $resolved['subtotal']
+        ];
+        $cartTotal += $resolved['subtotal'];
     }
 }
 ?>
@@ -178,7 +268,12 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
       <form id="checkoutForm" method="POST" enctype="multipart/form-data">
 
         <input type="hidden" name="from_ajax" value="1">
-        <input type="hidden" name="metode" id="metodeInput" value="tunai">
+
+        <!-- GANTI: gunakan nama sesuai kolom DB -->
+        <input type="hidden" name="metode_bayar" id="metodeInput" value="tunai">
+
+        <!-- KIRIM JUGA total_harga sebagai integer (backend mungkin juga menghitung sendiri, tapi ini aman) -->
+        <input type="hidden" name="total_harga" id="totalHargaInput" value="<?= intval($cartTotal) ?>">
 
         <h4>Ringkasan Pesanan</h4>
 
@@ -252,6 +347,7 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         <h4 style="margin-top:12px;margin-bottom:6px">Metode Pembayaran</h4>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;margin-bottom:8px">
           <button type="button" class="pay-chip active" data-metode="tunai" aria-pressed="true">💵 Tunai</button>
+          <!-- NOTE: data-metode non_tunai -> JS akan set metode_bayar = 'transfer' -->
           <button type="button" class="pay-chip" data-metode="non_tunai" aria-pressed="false">🏦 Non Tunai (QRIS)</button>
         </div>
 
@@ -266,7 +362,8 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
           </div>
           <div class="field">
             <label class="drawer-sub">Upload Bukti (opsional)</label>
-            <input class="input" type="file" name="bukti_non_tunai" id="bukti_non_tunai" accept="image/*">
+            <!-- GANTI name menjadi bukti_transfer sesuai nama kolom/konvensi backend -->
+            <input class="input" type="file" name="bukti_transfer" id="bukti_non_tunai" accept="image/*">
           </div>
           <div id="previewNonTunai" style="margin-top:10px;display:none;"></div>
         </div>
@@ -354,6 +451,7 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
   const panelTunai = document.getElementById('panelTunai');
   const panelNon = document.getElementById('panelNonTunai');
   const metodeInput = document.getElementById('metodeInput');
+  const totalHargaInput = document.getElementById('totalHargaInput');
 
   chips.forEach(c=> c.addEventListener('click', function(){
     chips.forEach(x=>x.classList.remove('active'));
@@ -362,7 +460,8 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     if (m === 'non_tunai') {
       panelTunai.style.display = 'none';
       panelNon.style.display = '';
-      metodeInput.value = 'non_tunai';
+      // KIRIM value 'transfer' karena enum di DB adalah 'transfer' untuk non-tunai
+      metodeInput.value = 'transfer';
     } else {
       panelNon.style.display = 'none';
       panelTunai.style.display = '';
@@ -400,6 +499,13 @@ document.getElementById('submitCheckout').addEventListener('click', function (e)
         name.classList.add("invalid");
         name.focus();
         return;
+    }
+
+    // update hidden total (safety)
+    const totalElem = document.getElementById('totalHargaInput');
+    if (totalElem) {
+        // ensure integer
+        totalElem.value = parseInt(totalElem.value) || 0;
     }
 
     const form = document.getElementById('checkoutForm');
