@@ -1,140 +1,205 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../../config/koneksi.php';
-if (session_status() === PHP_SESSION_NONE) session_start();
-require_once __DIR__ . '/../../config/koneksi.php';
 
 /*
-  Perubahan penting:
-  - Ambil data menu dasar (MN001) dan masukkan sebagai item pertama
-    dengan harga 0 (seblak).
-  - Perbaikan: deteksi ID yang tersimpan di $_SESSION['cart'] sehingga
-    dapat menampilkan topping, minuman, dan camilan meskipun key
-    memiliki prefix (mis. T123, M45, S67, or menu-45/snack-67).
-  - Tidak merubah struktur HTML/JS asli—hanya memperbaiki logika backend.
+  checkout.php — FINAL (Seblak Prasmanan + Minuman + Camilan)
+  - Seblak Prasmanan tidak otomatis masuk sebagai item.
+  - Semua topping di-cart dianggap bagian dari Seblak Prasmanan.
+  - Item di tabel `menu` dikelompokkan:
+      kategori = 'minuman' -> MINUMAN
+      kategori = 'camilan' -> CAMILAN
+      kategori = 'utama'   -> Seblak Prasmanan (hanya untuk ambil gambar & nama).
+  - Ringkasan pesanan:
+      1. Card Seblak Prasmanan (dengan gambar) + daftar topping.
+      2. Daftar Minuman.
+      3. Daftar Camilan.
+  - Hanya ada 1 total besar di bagian bawah.
 */
 
-$cartItems = [];
-$cartTotal = 0;
+$seblakToppings = [];   // topping seblak
+$drinkItems     = [];   // menu kategori = minuman
+$snackItems     = [];   // menu kategori = camilan
 
-// --- ambil menu dasar (seblak) ---
-$baseMenu = null;
+$seblakTotal = 0;
+$drinkTotal  = 0;
+$snackTotal  = 0;
+$cartTotal   = 0;
+
+// Ambil data Seblak Prasmanan untuk header (gambar + nama)
+$baseSeblak = null;
 try {
     $stmtm = $koneksi->prepare("SELECT id_menu, nama_menu, harga_dasar, gambar FROM menu WHERE id_menu = :id LIMIT 1");
     $stmtm->execute([':id' => 'MN001']);
-    $baseMenu = $stmtm->fetch(PDO::FETCH_ASSOC);
+    $baseSeblak = $stmtm->fetch(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
-    $baseMenu = null;
-}
-
-// jika ada menu dasar, tambahkan ke cartItems sebagai item base (harga 0)
-if ($baseMenu) {
-    $cartItems[] = [
-        'is_base' => true,
-        'id_menu' => $baseMenu['id_menu'],
-        'nama_topping' => $baseMenu['nama_menu'],
-        'gambar' => $baseMenu['gambar'],
-        'qty' => 1,
-        'harga' => 0,
-        'subtotal' => 0
-    ];
+    $baseSeblak = null;
 }
 
 /**
- * Fetch cart item by stored session key.
- * Supports keys like:
- *  - "T123" -> topping id 123
- *  - "M45"  -> menu id 45 (minuman)
- *  - "S67"  -> snack id 67 (camilan)
- *  - "topping-123", "menu-45", "snack-67"
- *  - numeric ids => will try topping first, then menu
+ * Resolve ID cart menjadi data item.
  *
- * Returns array with keys: id, name (nama_topping/nama_menu), harga, gambar, jenis ('topping'|'menu')
- * or null if not found.
+ * Mendukung pola:
+ *  - "T123" -> topping.id_topping = 123
+ *  - "M45"  -> menu.id_menu = 45
+ *  - "S67"  -> menu.id_menu = 67
+ *  - "topping-123" / "menu-45" / "snack-67"
+ *  - numeric id -> coba topping dulu lalu menu
+ *
+ * Return:
+ *  [
+ *    'id'       => string,
+ *    'name'     => string,
+ *    'harga'    => int,
+ *    'gambar'   => string,
+ *    'jenis'    => 'topping'|'menu',
+ *    'kategori' => 'topping'|'minuman'|'camilan'|'utama'|dll
+ *  ]
+ * atau null jika tidak ditemukan.
  */
-function resolveCartKey($pdo, $key) {
+function resolveCartKey(PDO $pdo, $key) {
     $k = trim((string)$key);
     if ($k === '') return null;
 
-    // prefixed single-letter like T/M/S
-    $first = strtoupper(substr($k,0,1));
-    if (in_array($first, ['T','M','S'])) {
-        $raw = substr($k,1);
-        // numeric id expected
+    // Helper: ambil topping
+    $fetchTopping = function(PDO $pdo, $id) {
+        $stmt = $pdo->prepare("
+            SELECT id_topping AS id, nama_topping AS name, harga, gambar
+            FROM topping
+            WHERE id_topping = :id
+            LIMIT 1
+        ");
+        $stmt->execute([':id' => $id]);
+        $r = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($r) {
+            $r['jenis']    = 'topping';
+            $r['kategori'] = 'topping';
+            return $r;
+        }
+        return null;
+    };
+
+    // Helper: ambil menu
+    $fetchMenu = function(PDO $pdo, $id) {
+        $stmt = $pdo->prepare("
+            SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar, kategori
+            FROM menu
+            WHERE id_menu = :id
+            LIMIT 1
+        ");
+        $stmt->execute([':id' => $id]);
+        $r = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($r) {
+            $r['jenis'] = 'menu';
+            if (empty($r['kategori'])) $r['kategori'] = 'menu';
+            return $r;
+        }
+        return null;
+    };
+
+    // prefix satu huruf: T / M / S
+    $first = strtoupper(substr($k, 0, 1));
+    if (in_array($first, ['T','M','S'], true)) {
+        $raw = substr($k, 1);
         if ($first === 'T') {
-            $stmt = $pdo->prepare("SELECT id_topping AS id, nama_topping AS name, harga, gambar FROM topping WHERE id_topping = :id LIMIT 1");
-            $stmt->execute([':id' => $raw]);
-            $r = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($r) { $r['jenis']='topping'; return $r; }
+            $r = $fetchTopping($pdo, $raw);
+            if ($r) return $r;
         } else {
-            // M or S -> menu table
-            $stmt = $pdo->prepare("SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar FROM menu WHERE id_menu = :id LIMIT 1");
-            $stmt->execute([':id' => $raw]);
-            $r = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($r) { $r['jenis']='menu'; return $r; }
+            $r = $fetchMenu($pdo, $raw);
+            if ($r) return $r;
         }
     }
 
-    // prefixed like "menu-123" or "snack-45" or "topping-12"
-    if (strpos($k,'-') !== false) {
-        list($pref,$raw) = explode('-', $k, 2);
+    // prefix dengan dash: topping-xxx / menu-xxx / snack-xxx
+    if (strpos($k, '-') !== false) {
+        list($pref, $raw) = explode('-', $k, 2);
         $pref = strtolower($pref);
         if ($pref === 'topping') {
-            $stmt = $pdo->prepare("SELECT id_topping AS id, nama_topping AS name, harga, gambar FROM topping WHERE id_topping = :id LIMIT 1");
-            $stmt->execute([':id' => $raw]);
-            $r = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($r) { $r['jenis']='topping'; return $r; }
-        } else { // menu/snack/menu etc -> menu table
-            $stmt = $pdo->prepare("SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar FROM menu WHERE id_menu = :id LIMIT 1");
-            $stmt->execute([':id' => $raw]);
-            $r = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($r) { $r['jenis']='menu'; return $r; }
+            $r = $fetchTopping($pdo, $raw);
+            if ($r) return $r;
+        } else {
+            $r = $fetchMenu($pdo, $raw);
+            if ($r) return $r;
         }
     }
 
-    // fallback: numeric id -> try topping first, then menu
+    // numeric murni: coba topping dulu, lalu menu
     if (ctype_digit($k)) {
-        $stmt = $pdo->prepare("SELECT id_topping AS id, nama_topping AS name, harga, gambar FROM topping WHERE id_topping = :id LIMIT 1");
-        $stmt->execute([':id' => $k]);
-        $r = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($r) { $r['jenis']='topping'; return $r; }
-
-        $stmt = $pdo->prepare("SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar FROM menu WHERE id_menu = :id LIMIT 1");
-        $stmt->execute([':id' => $k]);
-        $r = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($r) { $r['jenis']='menu'; return $r; }
+        $r = $fetchTopping($pdo, $k);
+        if ($r) return $r;
+        $r = $fetchMenu($pdo, $k);
+        if ($r) return $r;
     }
 
-    // if nothing matched, try to search both tables by id-like string (last resort)
-    $stmt = $pdo->prepare("SELECT id_topping AS id, nama_topping AS name, harga, gambar FROM topping WHERE id_topping = :id LIMIT 1");
-    $stmt->execute([':id' => $k]);
-    $r = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($r) { $r['jenis']='topping'; return $r; }
-    $stmt = $pdo->prepare("SELECT id_menu AS id, nama_menu AS name, harga_dasar AS harga, gambar FROM menu WHERE id_menu = :id LIMIT 1");
-    $stmt->execute([':id' => $k]);
-    $r = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($r) { $r['jenis']='menu'; return $r; }
+    // fallback terakhir
+    $r = $fetchTopping($pdo, $k);
+    if ($r) return $r;
+    $r = $fetchMenu($pdo, $k);
+    if ($r) return $r;
 
     return null;
 }
 
+// Build cart berdasarkan $_SESSION['cart']
 if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
-    foreach ($_SESSION['cart'] as $tid => $q) {
-        $resolved = resolveCartKey($koneksi, $tid);
+    foreach ($_SESSION['cart'] as $key => $val) {
+
+        $id  = null;
+        $qty = 1;
+
+        // Pola sederhana: 'ID' => 3
+        if ((is_string($key) || is_int($key)) && (is_int($val) || ctype_digit(strval($val)))) {
+            $id  = $key;
+            $qty = (int)$val;
+
+        // Pola array: ['id' => 'ID', 'qty' => 3]
+        } elseif (is_array($val)) {
+            $id  = $val['id']  ?? $key;
+            $qty = isset($val['qty']) ? (int)$val['qty'] : 1;
+        }
+
+        if (!$id || $qty < 1) continue;
+
+        $resolved = resolveCartKey($koneksi, $id);
         if (!$resolved) continue;
-        $resolved['qty'] = intval($q);
-        $resolved['subtotal'] = $resolved['qty'] * floatval($resolved['harga']);
-        // map to original keys expected by template (nama_topping used previously)
-        $cartItems[] = [
-            'id' => $resolved['id'],
-            'is_base' => false,
-            'nama_topping' => $resolved['name'],
-            'gambar' => $resolved['gambar'],
-            'qty' => $resolved['qty'],
-            'harga' => $resolved['harga'],
-            'subtotal' => $resolved['subtotal']
+
+        $harga    = (int)$resolved['harga'];
+        $subtotal = $harga * $qty;
+
+        // TOTAL GLOBAL
+        $cartTotal += $subtotal;
+
+        // Mapping struktur umum
+        $item = [
+            'id'       => $resolved['id'],
+            'nama'     => $resolved['name'],
+            'gambar'   => $resolved['gambar'],
+            'harga'    => $harga,
+            'qty'      => $qty,
+            'subtotal' => $subtotal,
+            'kategori' => $resolved['kategori'],
+            'jenis'    => $resolved['jenis'],
         ];
-        $cartTotal += $resolved['subtotal'];
+
+        // Kelompokkan
+        if ($resolved['jenis'] === 'topping') {
+            $seblakToppings[] = $item;
+            $seblakTotal     += $subtotal;
+
+        } elseif ($resolved['jenis'] === 'menu') {
+            $kat = strtolower($resolved['kategori']);
+
+            // Seblak Prasmanan (kategori 'utama') diabaikan dari list item
+            if ($kat === 'utama') {
+                continue;
+            } elseif ($kat === 'minuman') {
+                $drinkItems[] = $item;
+                $drinkTotal  += $subtotal;
+            } elseif ($kat === 'camilan') {
+                $snackItems[] = $item;
+                $snackTotal  += $subtotal;
+            }
+        }
     }
 }
 ?>
@@ -237,11 +302,19 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 }
 #qrisModal img{
   max-width:92%;max-height:92%;
-  border-radius:8px; box-shadow:0 8px 40px rgba(0,0,0,.6);
+  border-radius:8px; box-shadow:0 0 8px rgba(0,0,0,.6);
 }
 
 .btn-primary{padding:10px 18px;font-weight:800;background:var(--accent);border:0;border-radius:10px;cursor:pointer;}
 .btn-ghost{color:#d08c00;font-weight:700;}
+
+/* section style (GoFood-like) */
+.section-label{
+  margin-top:10px;
+  margin-bottom:4px;
+  font-weight:700;
+  font-size:14px;
+}
 </style>
 
 <div class="checkout-root" id="checkoutRoot" aria-hidden="true">
@@ -268,78 +341,100 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
       <form id="checkoutForm" method="POST" enctype="multipart/form-data">
 
         <input type="hidden" name="from_ajax" value="1">
-
-        <!-- GANTI: gunakan nama sesuai kolom DB -->
         <input type="hidden" name="metode_bayar" id="metodeInput" value="tunai">
-
-        <!-- KIRIM JUGA total_harga sebagai integer (backend mungkin juga menghitung sendiri, tapi ini aman) -->
-        <input type="hidden" name="total_harga" id="totalHargaInput" value="<?= intval($cartTotal) ?>">
+        <input type="hidden" name="total_harga" id="totalHargaInput" value="<?= (int)$cartTotal ?>">
 
         <h4>Ringkasan Pesanan</h4>
 
-        <?php if (empty($cartItems)): ?>
+        <?php if (empty($seblakToppings) && empty($drinkItems) && empty($snackItems)): ?>
           <div class="drawer-sub">Keranjang kosong.</div>
         <?php else: ?>
 
-          <ul style="list-style:none;padding:0;margin:0 0 12px 0">
+          <!-- SEBLAK PRASMANAN + TOPPING -->
+          <?php if (!empty($seblakToppings)): ?>
+            <div class="section-label">Seblak Prasmanan</div>
 
-          <?php
-          $firstTopping = true;
-          foreach ($cartItems as $it):
-
-              if (!empty($it['is_base'])) {
-                  $imgPath = 'assets/img/menu/' . htmlspecialchars($it['gambar']);
-              } else {
-                  $imgPath = 'assets/img/topping/' . htmlspecialchars($it['gambar']);
-              }
-          ?>
-
-            <li style="display:flex;justify-content:space-between;gap:12px;padding:10px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,0.03);margin-bottom:10px;align-items:center">
-              <div style="display:flex;gap:10px;align-items:center">
-
-                <img src="<?= $imgPath ?>" style="width:64px;height:64px;object-fit:cover;border-radius:10px">
-
+            <?php if ($baseSeblak): ?>
+              <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;padding:10px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,0.03);">
+                <img src="assets/img/menu/<?= htmlspecialchars($baseSeblak['gambar']) ?>" style="width:60px;height:60px;object-fit:cover;border-radius:10px">
                 <div>
-                  <div style="font-weight:800">
-
-                    <?php if (!empty($it['is_base'])): ?>
-                        <?= htmlspecialchars($it['nama_topping']) ?>
-                    <?php else: ?>
-                        <?php if ($firstTopping): ?>
-                          Seblak +
-                        <?php endif; ?>
-                        <?= htmlspecialchars($it['nama_topping']) ?>
-                    <?php endif; ?>
-
-                  </div>
-
-                  <?php if (empty($it['is_base'])): ?>
-                  <div style="color:var(--muted)">
-                    <?= intval($it['qty']) ?> × Rp <?= number_format($it['harga'],0,',','.') ?>
-                  </div>
-                  <?php endif; ?>
+                  <div style="font-weight:800;"><?= htmlspecialchars($baseSeblak['nama_menu']) ?></div>
+                  <div style="color:var(--muted);font-size:13px;">Harga mengikuti total topping yang dipilih</div>
                 </div>
               </div>
+            <?php endif; ?>
 
-              <?php if (empty($it['is_base'])): ?>
-              <div style="font-weight:800">
-                Rp <?= number_format($it['subtotal'],0,',','.') ?>
-              </div>
-              <?php else: ?>
-              <div style="font-weight:800"></div>
-              <?php endif; ?>
-            </li>
+            <div class="drawer-sub" style="margin-bottom:4px;">Topping yang dipilih:</div>
+            <ul style="list-style:none;padding:0;margin:4px 0 6px 0">
+              <?php foreach ($seblakToppings as $it): ?>
+                <li style="display:flex;justify-content:space-between;gap:12px;padding:9px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,0.03);margin-bottom:6px;align-items:center">
+                  <div style="display:flex;gap:10px;align-items:center">
+                    <img src="assets/img/topping/<?= htmlspecialchars($it['gambar']) ?>" style="width:50px;height:50px;object-fit:cover;border-radius:10px">
+                    <div>
+                      <div style="font-weight:800;"><?= htmlspecialchars($it['nama']) ?></div>
+                      <div style="color:var(--muted);font-size:13px;">
+                        <?= (int)$it['qty'] ?> × Rp <?= number_format($it['harga'],0,',','.') ?>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-weight:800;font-size:14px;">
+                    Rp <?= number_format($it['subtotal'],0,',','.') ?>
+                  </div>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php endif; ?>
 
-          <?php
-            if (empty($it['is_base'])) $firstTopping = false;
-          endforeach;
-          ?>
+          <!-- MINUMAN -->
+          <?php if (!empty($drinkItems)): ?>
+            <div class="section-label" style="margin-top:8px;">Minuman</div>
+            <ul style="list-style:none;padding:0;margin:4px 0 6px 0">
+              <?php foreach ($drinkItems as $it): ?>
+                <li style="display:flex;justify-content:space-between;gap:12px;padding:9px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,0.03);margin-bottom:6px;align-items:center">
+                  <div style="display:flex;gap:10px;align-items:center">
+                    <img src="assets/img/menu/<?= htmlspecialchars($it['gambar']) ?>" style="width:50px;height:50px;object-fit:cover;border-radius:10px">
+                    <div>
+                      <div style="font-weight:800;"><?= htmlspecialchars($it['nama']) ?></div>
+                      <div style="color:var(--muted);font-size:13px;">
+                        <?= (int)$it['qty'] ?> × Rp <?= number_format($it['harga'],0,',','.') ?>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-weight:800;font-size:14px;">
+                    Rp <?= number_format($it['subtotal'],0,',','.') ?>
+                  </div>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php endif; ?>
 
-          </ul>
+          <!-- CAMILAN -->
+          <?php if (!empty($snackItems)): ?>
+            <div class="section-label" style="margin-top:8px;">Camilan</div>
+            <ul style="list-style:none;padding:0;margin:4px 0 6px 0">
+              <?php foreach ($snackItems as $it): ?>
+                <li style="display:flex;justify-content:space-between;gap:12px;padding:9px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,0.03);margin-bottom:6px;align-items:center">
+                  <div style="display:flex;gap:10px;align-items:center">
+                    <img src="assets/img/menu/<?= htmlspecialchars($it['gambar']) ?>" style="width:50px;height:50px;object-fit:cover;border-radius:10px">
+                    <div>
+                      <div style="font-weight:800;"><?= htmlspecialchars($it['nama']) ?></div>
+                      <div style="color:var(--muted);font-size:13px;">
+                        <?= (int)$it['qty'] ?> × Rp <?= number_format($it['harga'],0,',','.') ?>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-weight:800;font-size:14px;">
+                    Rp <?= number_format($it['subtotal'],0,',','.') ?>
+                  </div>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php endif; ?>
 
         <?php endif; ?>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;font-weight:800;margin-top:6px;padding-top:8px;border-top:1px dashed rgba(0,0,0,0.04)">
+        <!-- TOTAL AKHIR -->
+        <div style="display:flex;justify-content:space-between;align-items:center;font-weight:800;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,0.08)">
           <div class="muted">Total Pesanan</div>
           <div>Rp <?= number_format($cartTotal,0,',','.') ?></div>
         </div>
@@ -347,7 +442,6 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         <h4 style="margin-top:12px;margin-bottom:6px">Metode Pembayaran</h4>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;margin-bottom:8px">
           <button type="button" class="pay-chip active" data-metode="tunai" aria-pressed="true">💵 Tunai</button>
-          <!-- NOTE: data-metode non_tunai -> JS akan set metode_bayar = 'transfer' -->
           <button type="button" class="pay-chip" data-metode="non_tunai" aria-pressed="false">🏦 Non Tunai (QRIS)</button>
         </div>
 
@@ -362,7 +456,6 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
           </div>
           <div class="field">
             <label class="drawer-sub">Upload Bukti (opsional)</label>
-            <!-- GANTI name menjadi bukti_transfer sesuai nama kolom/konvensi backend -->
             <input class="input" type="file" name="bukti_transfer" id="bukti_non_tunai" accept="image/*">
           </div>
           <div id="previewNonTunai" style="margin-top:10px;display:none;"></div>
@@ -451,7 +544,6 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
   const panelTunai = document.getElementById('panelTunai');
   const panelNon = document.getElementById('panelNonTunai');
   const metodeInput = document.getElementById('metodeInput');
-  const totalHargaInput = document.getElementById('totalHargaInput');
 
   chips.forEach(c=> c.addEventListener('click', function(){
     chips.forEach(x=>x.classList.remove('active'));
@@ -460,7 +552,6 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     if (m === 'non_tunai') {
       panelTunai.style.display = 'none';
       panelNon.style.display = '';
-      // KIRIM value 'transfer' karena enum di DB adalah 'transfer' untuk non-tunai
       metodeInput.value = 'transfer';
     } else {
       panelNon.style.display = 'none';
@@ -501,10 +592,8 @@ document.getElementById('submitCheckout').addEventListener('click', function (e)
         return;
     }
 
-    // update hidden total (safety)
     const totalElem = document.getElementById('totalHargaInput');
     if (totalElem) {
-        // ensure integer
         totalElem.value = parseInt(totalElem.value) || 0;
     }
 

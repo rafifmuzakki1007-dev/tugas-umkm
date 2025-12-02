@@ -31,79 +31,80 @@ $snacks = $snackStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // init cart
 if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
+// Normalisasi cart ke format: ID => qty (int)
+if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+} else {
+    $normalizedCart = [];
+    foreach ($_SESSION['cart'] as $k => $v) {
+        $id = null;
+        $qty = 0;
 
-/* ======= HANDLE POST (PRG) ======= */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // ADD to cart (topping flow)
-    
-
-/* ======= HANDLE POST (PRG) ======= */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // ADD to cart (topping/menu unified)
-    if (isset($_POST['add_to_cart'])) {
-        $rawId = trim($_POST['add_to_cart']);
-        $qty = (int)($_POST['qty'] ?? 1);
-        if ($qty < 1) $qty = 1;
-
-        // decide lookup id and type (topping if prefixed letter(s))
-        $isTopping = false;
-        if (preg_match('/^[A-Za-z]/', $rawId)) {
-            $isTopping = true;
-            $lookupId = preg_replace('/^[A-Za-z]+/', '', $rawId);
-        } else {
-            $lookupId = $rawId;
+        if (is_array($v)) {
+            $id = $v['id'] ?? $k;
+            $qty = isset($v['qty']) ? (int)$v['qty'] : 1;
+        } elseif (is_int($v) || ctype_digit((string)$v)) {
+            $id = $k;
+            $qty = (int)$v;
+        } elseif (is_string($v)) {
+            $id = $v;
+            $qty = 1;
         }
 
-        $item = null;
-        try {
-            if ($isTopping) {
-                $stmt = $koneksi->prepare("SELECT id_topping, nama_topping, harga, gambar FROM topping WHERE id_topping = :id");
-                $stmt->execute([':id' => $lookupId]);
-                $t = $stmt->fetch();
-                if ($t) {
-                    $item = [
-                        'id' => $rawId,
-                        'nama' => $t['nama_topping'],
-                        'harga' => isset($t['harga']) ? (int)$t['harga'] : 0,
-                        'qty' => $qty,
-                        'gambar' => $t['gambar'] ?? ''
-                    ];
-                }
-            }
+        if ($id) {
+            if ($qty < 1) $qty = 1;
+            if (!isset($normalizedCart[$id])) $normalizedCart[$id] = 0;
+            $normalizedCart[$id] += $qty;
+        }
+    }
+    $_SESSION['cart'] = $normalizedCart;
+}
 
-            if (!$item) {
-                $stmt = $koneksi->prepare("SELECT id_menu, nama_menu, harga_dasar, gambar FROM menu WHERE id_menu = :id");
-                $stmt->execute([':id' => $lookupId]);
-                $mRow = $stmt->fetch();
-                if ($mRow) {
-                    $item = [
-                        'id' => $rawId,
-                        'nama' => $mRow['nama_menu'],
-                        'harga' => isset($mRow['harga_dasar']) ? (int)$mRow['harga_dasar'] : 0,
-                        'qty' => $qty,
-                        'gambar' => $mRow['gambar'] ?? ''
-                    ];
+
+/* ======= HANDLE POST (PRG) ======= */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // ADD to cart (topping + menu unified) — SIMPLIFIED: SESSION CART = [ID => QTY]
+    if (isset($_POST['add_to_cart'])) {
+        $rawId = trim($_POST['add_to_cart']);
+        $qty   = (int)($_POST['qty'] ?? 1);
+        if ($qty < 1) $qty = 1;
+
+        // Validasi: pastikan ID ada di salah satu tabel
+        $found = false;
+
+        try {
+            // Cek topping
+            $stmt = $koneksi->prepare("SELECT id_topping FROM topping WHERE id_topping = :id LIMIT 1");
+            $stmt->execute([':id' => $rawId]);
+            if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+                $found = true;
+            } else {
+                // Cek menu
+                $stmt = $koneksi->prepare("SELECT id_menu FROM menu WHERE id_menu = :id LIMIT 1");
+                $stmt->execute([':id' => $rawId]);
+                if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $found = true;
                 }
             }
         } catch (PDOException $e) {
-            // log or set flash error (non-fatal)
-            $_SESSION['flash_add_failed'] = "DB error when adding: " . $e->getMessage();
-            $item = null;
+            $_SESSION['flash_add_failed'] = "DB error when validating item: " . $e->getMessage();
+            $found = false;
         }
 
-        if ($item) {
-            if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) $_SESSION['cart'] = [];
-            if (isset($_SESSION['cart'][$item['id']])) {
-                $_SESSION['cart'][$item['id']]['qty'] += $item['qty'];
-            } else {
-                $_SESSION['cart'][$item['id']] = $item;
+        if ($found) {
+            if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
+                $_SESSION['cart'] = [];
             }
+
+            if (!isset($_SESSION['cart'][$rawId])) {
+                $_SESSION['cart'][$rawId] = 0;
+            }
+            $_SESSION['cart'][$rawId] += $qty;
+
             $_SESSION['flash_add'] = true;
         } else {
-            // optional: set flash to inform item not found
-            if (!isset($_SESSION['flash_add_failed'])) $_SESSION['flash_add_failed'] = 'Item tidak ditemukan.';
+            $_SESSION['flash_add_failed'] = 'Item tidak ditemukan.';
         }
     }
 
@@ -120,22 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: " . $_SERVER['REQUEST_URI']);
     exit;
 }
-
-
-        header("Location: " . $_SERVER['REQUEST_URI']);
-        exit;
-    }
-
-    // REMOVE from cart (topping flow)
-    if (isset($_POST['remove_from_cart'])) {
-        $id = trim($_POST['remove_from_cart']);
-        if ($id !== '' && isset($_SESSION['cart'][$id])) {
-            unset($_SESSION['cart'][$id]);
-            $_SESSION['flash_remove'] = true;
-        }
-        header("Location: " . $_SERVER['REQUEST_URI']);
-        exit;
-    }
 
 // include header
 include 'app/views/sections/header_nav.php';
@@ -381,11 +366,11 @@ include 'app/views/sections/header_nav.php';
 }
 .topping-card:hover{
   transform: translateY(-10px);
-  box-shadow: 0 28px 60px rgba(12,12,12,.12);
+  box-shadow: 0 28px 620px rgba(12,12,12,.12);
 }
 .topping-img{
   width:100%;
-  aspect-ratio: 16/9;
+  aspect-ratio: 1/1;
   object-fit:cover;
   border-radius:10px;
   margin-bottom:10px;
@@ -537,9 +522,9 @@ include 'app/views/sections/header_nav.php';
 .menu-right{ flex: unset; width:100% !important; margin-top: 24px; box-shadow:none; background:transparent; border:none; padding:0; }
 
 /* Topping cards simplified to clean grid (no heavy cards) */
-.topping-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:18px; }
+.topping-grid{ grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:18px; }
 .topping-card{ background: transparent; box-shadow: none; border-radius:12px; padding:10px; display:flex; flex-direction:column; align-items:center; gap:8px; border:1px solid rgba(0,0,0,0.04); }
-.topping-card img{ width:100%; height:95px; object-fit:cover; border-radius:10px; }
+.topping-card img{ width:65%; height:150px; object-fit:cover; border-radius:10px; }
 .topping-card .topping-name{ font-weight:700; color:var(--dark); text-align:center; }
 .topping-card .topping-price{ color:#d43f3f; font-weight:800; margin-top:4px; }
 
@@ -782,7 +767,7 @@ if (file_exists($heroPathServer)) {
               <div style="color:#999;font-weight:700;">Stok habis</div>
             <?php else: ?>
               <button class="btn-add openQtyModal"
-                data-id="<?php echo htmlspecialchars('T'.$t['id_topping']); ?>"
+                data-id="<?php echo htmlspecialchars($t['id_topping']); ?>"
                 data-name="<?php echo htmlspecialchars($t['nama_topping']); ?>"
                 data-price="<?php echo htmlspecialchars($t['harga']); ?>">
                 + Tambah
@@ -812,7 +797,7 @@ if (file_exists($heroPathServer)) {
 
             <!-- Convert to + Tambah that opens qty modal and adds to cart -->
             <button class="btn-add openQtyModal"
-              data-id="<?php echo htmlspecialchars('M'.$d['id_menu']); ?>"
+              data-id="<?php echo htmlspecialchars($d['id_menu']); ?>"
               data-name="<?php echo htmlspecialchars($d['nama_menu']); ?>"
               data-price="<?php echo htmlspecialchars($d['harga_dasar']); ?>">
               + Tambah
@@ -837,7 +822,7 @@ if (file_exists($heroPathServer)) {
             </div>
 
             <button class="btn-add openQtyModal"
-              data-id="<?php echo htmlspecialchars('S'.$s['id_menu']); ?>"
+              data-id="<?php echo htmlspecialchars($s['id_menu']); ?>"
               data-name="<?php echo htmlspecialchars($s['nama_menu']); ?>"
               data-price="<?php echo htmlspecialchars($s['harga_dasar']); ?>">
               + Tambah

@@ -1,17 +1,42 @@
 <?php if(session_status() === PHP_SESSION_NONE) session_start(); ?>
 
-<!-- ❌ SWEETALERT DIHAPUS DARI SINI (SUPAYA TIDAK DOUBLE LOAD) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 <link href="assets/css/style.css" rel="stylesheet">
 
 <?php 
-if(!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
+// Normalisasi cart & hitung total qty untuk badge
+if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+} else {
+    $normalized = [];
+    foreach ($_SESSION['cart'] as $k => $v) {
+        $id = null;
+        $qty = 0;
+
+        if (is_array($v)) {
+            $id = $v['id'] ?? $k;
+            $qty = isset($v['qty']) ? (int)$v['qty'] : 1;
+        } elseif (is_int($v) || ctype_digit((string)$v)) {
+            $id = $k;
+            $qty = (int)$v;
+        } elseif (is_string($v)) {
+            $id = $v;
+            $qty = 1;
+        }
+
+        if ($id) {
+            if ($qty < 1) $qty = 1;
+            if (!isset($normalized[$id])) $normalized[$id] = 0;
+            $normalized[$id] += $qty;
+        }
+    }
+    $_SESSION['cart'] = $normalized;
+}
 $cartCount = array_sum($_SESSION['cart']);
 ?>
 
-<!-- LOADER SCREEN -->
 <div id="pageLoader" 
      style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
             background:white; z-index:9999; display:flex; align-items:center; 
@@ -67,7 +92,6 @@ $cartCount = array_sum($_SESSION['cart']);
   </div>
 </header>
 
-<!-- FLOATING CART -->
 <?php if(($_GET['page'] ?? '') === 'menu' && !isset($_SESSION['admin'])): ?>
 <a onclick="openCart()" id="cartFloatBtn" class="cart-float-menu">
   <i class="bi bi-cart3"></i>
@@ -95,18 +119,15 @@ $cartCount = array_sum($_SESSION['cart']);
 <?php endif; ?>
 
 <script>
-// Mobile Nav
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".mobile-nav-toggle")
     ?.addEventListener("click", () => document.querySelector("#navmenu ul").classList.toggle("show"));
 });
 
-// Loader Function
 function showLoader() {
   document.getElementById("pageLoader").style.display = "flex";
 }
 
-// Show loader when entering menu page (for refresh/redirect)
 if (window.location.href.includes("page=menu")) {
   document.getElementById("pageLoader").style.display = "flex";
   setTimeout(() => {
